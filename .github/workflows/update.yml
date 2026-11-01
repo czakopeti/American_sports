@@ -1,0 +1,49 @@
+# Twice a day (UTC): after the late US games are in, and again in the afternoon.
+name: Update odds
+on:
+  schedule:
+    - cron: "15 10 * * *"
+    - cron: "15 16 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["sports/**", "web/**", "scripts/**", "config.json", ".github/workflows/update.yml"]
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: odds-update
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Tests
+        run: python -m unittest discover -s tests -v
+      - name: Download, predict, build
+        run: python scripts/run.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Keep the latest data in the repository
+        continue-on-error: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/odds.json
+          if git diff --cached --quiet; then echo "No change."; else git commit -m "Update odds data" && git pull --rebase && git push; fi
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

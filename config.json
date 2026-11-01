@@ -1,0 +1,37 @@
+{
+  "documentation": "Tuning constants and sources. Seasons, teams, fixtures, scores and home advantage are read from the data on every run. Settings were chosen on the previous season, each day or week predicted only from earlier games.",
+  "user_agent": "American-sports-odds/1.0 (personal weekly/daily build; +https://github.com/czakopeti/American_sports)",
+  "sports": {
+    "nfl": {
+      "label": "NFL",
+      "games_url": "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv",
+      "group": "week",
+      "prior_share": 0.5,
+      "prior_weight": 8,
+      "home_advantage": 2.6,
+      "margin_sd": 13.2,
+      "unit": "points"
+    },
+    "nba": {
+      "label": "NBA",
+      "schedule_url": "https://raw.githubusercontent.com/sportsdataverse/hoopR-nba-data/main/nba/schedules/parquet/nba_schedule_{year}.parquet",
+      "group": "day",
+      "prior_share": 0.5,
+      "prior_weight": 10,
+      "home_advantage": "previous_season",
+      "margin_sd": 14.6,
+      "unit": "points"
+    },
+    "nhl": {
+      "label": "NHL",
+      "schedule_url": "https://raw.githubusercontent.com/sportsdataverse/fastRhockey-nhl-data/main/nhl/schedules/parquet/nhl_schedule_{year}.parquet",
+      "group": "day",
+      "prior_share": 0.3,
+      "prior_weight": 40,
+      "home_advantage": "previous_season",
+      "overtime_home_share": 0.5,
+      "unit": "goals"
+    }
+  },
+  "min_home_games_for_team": 10
+}

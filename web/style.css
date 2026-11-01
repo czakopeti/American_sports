@@ -1,0 +1,22 @@
+:root{--bg:#0b0e17;--panel:#121725;--panel2:#1a2133;--ink:#eef1f8;--muted:#8d96ad;--faint:#2a3248;--good:#3ddc97;--bad:#ff6b6b;--home:#5aa9ff;--away:#ffb35a;
+--f-display:"Big Shoulders Display",Impact,sans-serif;--f-body:"Instrument Sans",system-ui,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:light){:root{--bg:#f6f7fb;--panel:#fff;--panel2:#eef1f7;--ink:#121725;--muted:#5d667c;--faint:#dde2ec}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body)}
+.wrap{max-width:1040px;margin:0 auto;padding:18px 16px 48px}
+.kicker{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:900;font-size:clamp(36px,9vw,72px);line-height:.95;margin:6px 0 0;text-transform:uppercase}
+.note{font-size:12.5px;color:var(--muted);max-width:76ch}.note a{color:var(--ink)}
+.tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--faint);border-radius:12px;padding:4px;margin-top:18px}
+.tabs button{flex:1;border:0;background:transparent;border-radius:9px;padding:9px 12px;font:700 15px var(--f-body);color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+select,button.nav{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--faint);border-radius:8px;padding:6px 10px}
+button.nav{cursor:pointer;min-width:38px}
+.panel{background:var(--panel);border:1px solid var(--faint);border-radius:14px;padding:4px 14px;margin-top:12px}
+.tw{overflow-x:auto;margin:0 -14px;padding:0 14px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font:500 10.5px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:right;padding:10px 6px;border-bottom:1px solid var(--faint);white-space:nowrap}
+td{padding:9px 6px;border-bottom:1px solid var(--faint);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:0}th.l,td.l{text-align:left}
+.mono{font-family:var(--f-mono)}.ok{color:var(--good)}.no{color:var(--bad)}.sub{display:block;font-size:11.5px;color:var(--muted)}
+.fav{font-weight:700}
