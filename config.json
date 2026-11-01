@@ -30,7 +30,9 @@
       "prior_weight": 40,
       "home_advantage": "previous_season",
       "overtime_home_share": 0.5,
-      "unit": "goals"
+      "unit": "goals",
+      "period_feed": "https://api-web.nhle.com/v1/schedule/{date}",
+      "three_way": true
     }
   },
   "min_home_games_for_team": 10

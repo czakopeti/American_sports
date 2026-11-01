@@ -18,7 +18,27 @@ def _num(v, d=2):
 def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int) -> dict:
     sc = cfg["sports"][key]
     cur, prev = data.nfl(sc, ua, today) if key == "nfl" else data.daily(key, sc, ua, today, min_home)
+    if sc.get("three_way"):
+        periods = data.nhl_period_types(sc, ua, cur, today)
+        cur["pt"] = cur.gid.map(periods)
+        cur["fhs"], cur["fas"] = cur.hs, cur.as_          # final score, kept for display
+        # Fit on regulation goals: the overtime or shootout winner's extra goal is taken off.
+        extra = cur.pt.isin(["OT", "SO"]) & cur.done
+        cur.loc[extra & (cur.hs > cur.as_), "hs"] -= 1
+        cur.loc[extra & (cur.as_ > cur.hs), "as_"] -= 1
     P, home = model.predict_season(cur, prev, sc)
+    draw_rate = None
+    if sc.get("three_way"):
+        # Independent Poisson goals give too few regulation draws. Scale the draw chance so the
+        # average matches the share of last season's games that went to overtime or a shootout.
+        prev_types = data.nhl_period_types(sc, ua, prev, pd.Timestamp(prev.group.max()).date()) if len(prev) else {}
+        known = [t for t in prev_types.values() if t]
+        if len(known) >= 200:
+            draw_rate = sum(t in ("OT", "SO") for t in known) / len(known)
+            mean_d = float(P.px.mean())
+            k = (draw_rate * (1 - mean_d)) / (mean_d * (1 - draw_rate))
+            tot = P.p1 + k * P.px + P.p2
+            P["p1"], P["px"], P["p2"] = P.p1 / tot, k * P.px / tot, P.p2 / tot
     groups = []
     for grp, g in P.groupby("group", sort=True):
         games = []
@@ -28,16 +48,35 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int) -> dict
                 item.update(as_=int(r.as_), hs=int(r.hs))
             if key == "nfl":
                 item.update(sp=_num(r.spread, 1), tot=_num(r.total, 1), mla=_num(r.ml_away, 0), mlh=_num(r.ml_home, 0))
+            if sc.get("three_way"):
+                item.update(p1=_num(r.p1, 4), px=_num(r.px, 4), p2=_num(r.p2, 4))
+                if r.done:
+                    item.update(as_=int(r.fas), hs=int(r.fhs))
+                    pt = getattr(r, "pt", None)
+                    if isinstance(pt, str):
+                        item["pt"] = pt
+                        item["reg"] = 1 if pt in ("OT", "SO") else (0 if r.fhs > r.fas else 2)
             games.append(item)
         groups.append({"g": str(grp), "games": games})
     open_groups = [x["g"] for x in groups if any("hs" not in m for m in x["games"])]
     played = P[P.done]
-    hits = int(((played.ph > 0.5) == (played.hs > played.as_)).sum()) if len(played) else 0
+    fh = played.fhs if "fhs" in played else played.hs
+    fa = played.fas if "fas" in played else played.as_
+    hits = int(((played.ph > 0.5) == (fh > fa)).sum()) if len(played) else 0
+    extra = {}
+    if sc.get("three_way") and "pt" in played and played.pt.notna().any():
+        known = played[played.pt.notna()]
+        reg = known.pt.isin(["OT", "SO"]).map({True: 1, False: None})
+        reg = reg.where(reg.notna(), (known.fhs < known.fas).map({False: 0, True: 2}))
+        pick = known[["p1", "px", "p2"]].to_numpy().argmax(axis=1)
+        extra = {"reg_known": int(len(known)), "reg_fav_won": int((pick == reg.astype(int).to_numpy()).sum()),
+                 "reg_draws": int(known.pt.isin(["OT", "SO"]).sum())}
     season = int(cur.season.iloc[0])
     label = f"{season}" if key == "nfl" else f"{season - 1}–{str(season)[-2:]}"
     return {"key": key, "label": sc["label"], "season": label, "unit": sc["unit"], "group_kind": sc["group"],
             "home_advantage": round(home, 2), "current": open_groups[0] if open_groups else (groups[-1]["g"] if groups else None),
-            "played": int(len(played)), "fav_won": hits, "groups": groups}
+            "played": int(len(played)), "fav_won": hits, "groups": groups,
+            "draw_rate_last_season": None if draw_rate is None else round(draw_rate, 3)} | extra
 
 
 def build(root: Path, cfg: dict, today: date) -> dict:

@@ -40,6 +40,16 @@ def win_poisson(lh: float, la: float, ot_home: float) -> float:
     return win + tie * ot_home
 
 
+def three_way(lh: float, la: float) -> tuple[float, float, float]:
+    """Regulation-time home win, draw, away win from independent Poisson goals."""
+    lh, la = max(lh, 0.2), max(la, 0.2)
+    ph = [math.exp(-lh) * lh ** k / math.factorial(k) for k in range(16)]
+    pa = [math.exp(-la) * la ** k / math.factorial(k) for k in range(16)]
+    w = sum(ph[i] * pa[j] for i in range(16) for j in range(i))
+    d = sum(ph[i] * pa[i] for i in range(16))
+    return w, d, 1 - w - d
+
+
 def predict_season(cur: pd.DataFrame, prev: pd.DataFrame, cfg: dict) -> tuple[pd.DataFrame, float]:
     teams = sorted(set(cur.home) | set(cur.away))
     pdone = prev[prev.done & prev.home.isin(teams) & prev.away.isin(teams)]
@@ -65,10 +75,13 @@ def predict_season(cur: pd.DataFrame, prev: pd.DataFrame, cfg: dict) -> tuple[pd
         for g in cur[cur.group == grp].itertuples():
             eh = lvl + att[ix[g.home]] - de[ix[g.away]] + home / 2
             ea = lvl + att[ix[g.away]] - de[ix[g.home]] - home / 2
+            row = {"idx": g.Index, "eh": eh, "ea": ea}
             if cfg["unit"] == "goals":
-                p = win_poisson(eh, ea, cfg.get("overtime_home_share", 0.5))
+                row["ph"] = win_poisson(eh, ea, cfg.get("overtime_home_share", 0.5))
+                if cfg.get("three_way"):
+                    row["p1"], row["px"], row["p2"] = three_way(eh, ea)
             else:
-                p = win_normal(eh - ea, cfg["margin_sd"])
-            rows.append({"idx": g.Index, "eh": eh, "ea": ea, "ph": p})
+                row["ph"] = win_normal(eh - ea, cfg["margin_sd"])
+            rows.append(row)
     P = pd.DataFrame(rows).set_index("idx")
     return cur.join(P), home

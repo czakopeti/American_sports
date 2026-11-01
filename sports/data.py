@@ -4,6 +4,7 @@ plus market lines for the NFL (closing spread, total and moneylines from nflvers
 from __future__ import annotations
 
 import io
+import json
 import urllib.request
 from datetime import date
 
@@ -49,7 +50,7 @@ def _espn_like(cfg: dict, ua: str, year: int, kind: str) -> pd.DataFrame:
     else:
         d = d[d.game_type == "R"]
         out = pd.DataFrame({"away": d.away_team_abbr, "home": d.home_team_abbr, "as_": d.away_score, "hs": d.home_score,
-                            "done": d.home_score.notna(), "t": pd.to_datetime(d.game_time, utc=True)})
+                            "done": d.home_score.notna(), "t": pd.to_datetime(d.game_time, utc=True), "gid": d.game_id.astype("int64")})
     out = out[out.t.notna()].copy()
     out["season"] = year
     out["group"] = out.t.dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d")
@@ -73,3 +74,30 @@ def daily(kind: str, cfg: dict, ua: str, today: date, min_home: int) -> tuple[pd
     pt = prev.home.value_counts(); pkeep = set(pt[pt >= min_home].index)
     prev = prev[prev.home.isin(pkeep) & prev.away.isin(pkeep)]
     return cur.reset_index(drop=True), prev.reset_index(drop=True)
+
+
+def nhl_period_types(cfg: dict, ua: str, cur: pd.DataFrame, today: date) -> dict:
+    """Last period of each finished game (REG, OT or SO) from the NHL's own schedule feed.
+
+    Returns {} if the feed cannot be reached; the page then shows final scores only.
+    """
+    out: dict[int, str] = {}
+    if not len(cur):
+        return out
+    day = pd.Timestamp(cur.group.min())
+    end = pd.Timestamp(today) + pd.Timedelta(days=1)
+    for _ in range(60):
+        if day > end:
+            break
+        try:
+            j = json.loads(_get(cfg["period_feed"].format(date=day.strftime("%Y-%m-%d")), ua))
+        except Exception:  # noqa: BLE001 - optional detail
+            return out
+        for w in j.get("gameWeek", []):
+            for g in w.get("games", []):
+                t = (g.get("gameOutcome") or {}).get("lastPeriodType")
+                if t:
+                    out[int(g["id"])] = t
+        nxt = j.get("nextStartDate")
+        day = pd.Timestamp(nxt) if nxt else day + pd.Timedelta(days=7)
+    return out
