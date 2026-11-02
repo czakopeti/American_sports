@@ -18,10 +18,21 @@ const NOTES = {
   nba: "Points scored and allowed, adjusted for the opponent. Each date is predicted only from earlier dates. Half of last season's rating carries over, fading as games pile up. Home advantage is last season's average home margin. Win chance from a normal spread of results (14.6 points).",
   nhl: "Three-way odds for regulation time (60 minutes): home win, draw, away win. Goals scored and allowed in regulation, adjusted for the opponent; an overtime or shootout winner's extra goal is left out. Each date is predicted only from earlier dates. Hockey is close to a coin flip, so the ratings are pulled strongly towards average early on. Chances from Poisson goals. OT and SO mark games decided in overtime or a shootout: a draw after 60 minutes.",
 };
+// Open on today's games: the first date (US Eastern, where the league plays) that is today or later.
+// For the NFL, the week of the next game still to be played.
+function today(s) {
+  if (s.group_kind === "week") {
+    const now = Date.now(), up = s.groups.find((x) => x.games.some((m) => new Date(m.t).getTime() + 4 * 3600e3 > now));
+    return up ? up.g : null;
+  }
+  const et = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const up = s.groups.find((x) => x.g >= et);
+  return up ? up.g : null;
+}
 function render() {
   const s = D.sports[S.sp];
   const keys = s.groups.map((x) => x.g);
-  if (!S.g[s.key] || !keys.includes(S.g[s.key])) S.g[s.key] = s.current || keys[keys.length - 1];
+  if (!S.g[s.key] || !keys.includes(S.g[s.key])) S.g[s.key] = today(s) || s.current || keys[keys.length - 1];
   const gi = keys.indexOf(S.g[s.key]), G = s.groups[gi];
   const done = G.games.filter((m) => m.hs != null), favOk = done.filter((m) => (m.ph > 0.5) === (m.hs > m.as_)).length;
   const nfl = s.key === "nfl", u = s.unit === "goals" ? "goals" : "points", three = G.games.some((m) => m.p1 != null);
@@ -32,7 +43,7 @@ function render() {
   <div class="tabs" role="tablist">${D.sports.map((x, i) => `<button role="tab" aria-selected="${i === S.sp}" data-sp="${i}">${esc(x.label)}</button>`).join("")}</div>
   ${s.stale ? `<p class="note">Today's update for ${esc(s.label)} failed. This is the last good copy.</p>` : ""}
   <div class="bar"><button class="nav" data-step="-1" ${gi === 0 ? "disabled" : ""} aria-label="Previous">‹</button>
-    <select id="grp">${s.groups.map((x) => `<option value="${esc(x.g)}" ${x.g === G.g ? "selected" : ""}>${esc(glabel(s, x.g))}${x.g === s.current ? " (current)" : ""}</option>`).join("")}</select>
+    <select id="grp">${s.groups.map((x) => `<option value="${esc(x.g)}" ${x.g === G.g ? "selected" : ""}>${esc(glabel(s, x.g))}${x.g === today(s) ? (s.group_kind === "week" ? " (this week)" : " (today)") : ""}</option>`).join("")}</select>
     <button class="nav" data-step="1" ${gi === keys.length - 1 ? "disabled" : ""} aria-label="Next">›</button>
     <span class="note">${s.label} ${esc(s.season)} · ${three && s.reg_known ? `60-minute favourite right ${s.reg_fav_won} of ${s.reg_known} (${s.reg_draws} went to overtime)` : `favourite won ${s.fav_won} of ${s.played}`}${done.length && !three ? ` · this ${s.group_kind === "week" ? "week" : "day"}: ${favOk} of ${done.length}` : ""}</span></div>
   <div class="panel"><div class="tw"><table><thead><tr><th class="l">Game (away @ home)</th><th>Expected</th><th>Total</th>${three ? "<th>Home · Draw · Away (60 min)</th><th>Odds 1</th><th>Odds X</th><th>Odds 2</th>" : "<th>Home win</th><th>Odds away</th><th>Odds home</th>"}${nfl ? "<th>Market</th>" : ""}<th>Result</th></tr></thead><tbody>

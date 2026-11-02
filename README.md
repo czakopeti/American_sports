@@ -1,7 +1,7 @@
 # American sports: fair odds
 
 Our own ratings, expected scores, win chances and fair odds (1 ÷ chance, no bookmaker margin) for the **NFL**, **NBA** and **NHL**.
-Live page: GitHub Pages of this repository. Updated twice a day by `.github/workflows/update.yml`.
+Live page: GitHub Pages of this repository. Updated twice a day (09:13 and 12:13 Budapest time in winter) by `.github/workflows/update.yml`. The page opens on today's games.
 
 ## Data
 - NFL: [nflverse](https://github.com/nflverse/nflverse-data) schedules and scores, with the closing spread, total and moneylines shown for comparison.

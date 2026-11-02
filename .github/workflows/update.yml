@@ -1,9 +1,10 @@
-# Twice a day (UTC): after the late US games are in, and again in the afternoon.
+# Twice a day. GitHub reads these times as UTC: 08:13 and 11:13 UTC are 09:13 and 12:13 in Budapest
+# in winter (10:13 and 13:13 in summer). Odd minutes avoid the top-of-hour rush that delays scheduled runs.
 name: Update odds
 on:
   schedule:
-    - cron: "15 10 * * *"
-    - cron: "15 16 * * *"
+    - cron: "13 8 * * *"
+    - cron: "13 11 * * *"
   workflow_dispatch:
   push:
     branches: [main]
