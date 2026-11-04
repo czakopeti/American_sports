@@ -1,4 +1,4 @@
-# GitHub reads these times as UTC. Scheduled runs are best effort: GitHub often starts them late
+# GitHub reads these times as UTC. Scheduled runs are best effort: GitHub often starts them late 
 # or skips them, so the job is offered every hour from 07:13 to 15:13 UTC (08:13 to 16:13 Budapest
 # time in winter). A run takes about a minute and only commits when the data changed.
 name: Update odds
