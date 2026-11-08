@@ -13,19 +13,20 @@ const dfmt = (d) => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { wee
 const glabel = (s, g) => (s.group_kind === "week" ? `Week ${g}` : dfmt(g));
 const line = (sp, home) => (sp == null ? "–" : sp > 0 ? `${home} −${sp}` : sp < 0 ? `${home} +${-sp}` : "pick");
 const pct = (x) => (x > 0 ? "+" : "") + (x * 100).toFixed(1) + "%";
-// Bookmaker home and away prices and our edge on each: our chance × the price − 1.
+// Everything reads away first, home second, like "away @ home".
+// Bookmaker away and home prices and our edge on each: our chance × the price − 1.
 const edgeCells = (m) => {
   if (!m.bh || !m.ba || m.pm == null) return `<td class="mono">–</td><td class="mono">–</td>`;
-  const e = [m.pm * m.bh - 1, (1 - m.pm) * m.ba - 1];
+  const e = [(1 - m.pm) * m.ba - 1, m.pm * m.bh - 1];
   const c = (x) => `<span class="${x >= 0.05 ? "ok" : ""}">${pct(x)}</span>`;
-  return `<td class="mono">${m.bh.toFixed(2)} · ${m.ba.toFixed(2)}</td><td class="mono">${c(e[0])} / ${c(e[1])}</td>`;
+  return `<td class="mono">${m.ba.toFixed(2)} · ${m.bh.toFixed(2)}</td><td class="mono">${c(e[0])} / ${c(e[1])}</td>`;
 };
-const EDGE_TH = "<th>Book 1 · 2</th><th>Edge 1 / 2</th>";
+const EDGE_TH = "<th>Book away · home</th><th>Edge away / home</th>";
 const ml2dec = (ml) => (ml == null ? null : ml > 0 ? 1 + ml / 100 : 1 + 100 / -ml);
 const NOTES = {
   nfl: "Points scored and allowed, adjusted for the opponent. Last season counts as a few games of prior early on. Home advantage 2.6 points. Win chance from a normal spread of results (13.2-point standard deviation). The market line is the closing spread, total and moneyline from nflverse, shown for comparison.",
   nba: "Points scored and allowed, adjusted for the opponent. Each date is predicted only from earlier dates. Half of last season's rating carries over, fading as games pile up. Home advantage is last season's average home margin. Win chance from a normal spread of results (14.6 points).",
-  nhl: "Three-way odds for regulation time (60 minutes): home win, draw, away win. Goals scored and allowed in regulation, adjusted for the opponent; an overtime or shootout winner's extra goal is left out. Each date is predicted only from earlier dates. Hockey is close to a coin flip, so the ratings are pulled strongly towards average early on. Chances from Poisson goals. OT and SO mark games decided in overtime or a shootout: a draw after 60 minutes.",
+  nhl: "Three-way odds for regulation time (60 minutes): away win, draw, home win. Goals scored and allowed in regulation, adjusted for the opponent; an overtime or shootout winner's extra goal is left out. Each date is predicted only from earlier dates. Hockey is close to a coin flip, so the ratings are pulled strongly towards average early on. Chances from Poisson goals. OT and SO mark games decided in overtime or a shootout: a draw after 60 minutes.",
 };
 // Open on today's games: the first date (US Eastern, where the league plays) that is today or later.
 // For the NFL, the week of the next game still to be played.
@@ -55,24 +56,24 @@ function render() {
     <select id="grp">${s.groups.map((x) => `<option value="${esc(x.g)}" ${x.g === G.g ? "selected" : ""}>${esc(glabel(s, x.g))}${x.g === today(s) ? (s.group_kind === "week" ? " (this week)" : " (today)") : ""}</option>`).join("")}</select>
     <button class="nav" data-step="1" ${gi === keys.length - 1 ? "disabled" : ""} aria-label="Next">›</button>
     <span class="note">${s.label} ${esc(s.season)} · ${three && s.reg_known ? `60-minute favourite right ${s.reg_fav_won} of ${s.reg_known} (${s.reg_draws} went to overtime)` : `favourite won ${s.fav_won} of ${s.played}`}${done.length && !three ? ` · this ${s.group_kind === "week" ? "week" : "day"}: ${favOk} of ${done.length}` : ""}</span></div>
-  <div class="panel"><div class="tw"><table><thead><tr><th class="l">Game (away @ home)</th><th>Expected</th><th>Total</th>${three ? "<th>Home · Draw · Away (60 min)</th><th>Odds 1</th><th>Odds X</th><th>Odds 2</th><th>Ours 1 · 2 (incl. OT)</th>" : "<th>Home win</th><th>Odds away</th><th>Odds home</th>"}${nfl ? "<th>Market</th>" : ""}${EDGE_TH}<th>Result</th></tr></thead><tbody>
+  <div class="panel"><div class="tw"><table><thead><tr><th class="l">Game (away @ home)</th><th>Expected</th><th>Total</th>${three ? "<th>Away · Draw · Home (60 min)</th><th>Odds away</th><th>Odds draw</th><th>Odds home</th><th>Ours incl. OT</th>" : "<th>Away · Home win</th><th>Odds away</th><th>Odds home</th>"}${nfl ? "<th>Market</th>" : ""}${EDGE_TH}<th>Result</th></tr></thead><tbody>
   ${three ? G.games.map((m) => {
     const p = [m.p1, m.px, m.p2], pick = p.indexOf(Math.max(...p));
     const res = m.hs != null ? `${m.as_}–${m.hs}${m.pt && m.pt !== "REG" ? ` <span class="sub" style="display:inline">${esc(m.pt)}</span>` : ""}${m.reg != null ? ` <span class="${pick === m.reg ? "ok" : "no"}">${pick === m.reg ? "✓" : "✗"}</span>` : ""}` : "–";
     return `<tr><td class="l"><span class="sub">${esc(tfmt(m.t))}</span><span class="${pick === 2 ? "fav" : ""}">${esc(m.a)}</span> @ <span class="${pick === 0 ? "fav" : ""}">${esc(m.h)}</span></td>
-      <td class="mono">${m.ea.toFixed(1)}–${m.eh.toFixed(1)}</td><td class="mono">${(m.ea + m.eh).toFixed(1)}</td><td class="mono">${pc(m.p1)} · ${pc(m.px)} · ${pc(m.p2)}</td>
-      <td class="mono">${odd(m.p1)}</td><td class="mono">${odd(m.px)}</td><td class="mono">${odd(m.p2)}</td><td class="mono">${m.pm != null ? odd(m.pm) + " · " + odd(1 - m.pm) : "–"}</td>${edgeCells(m)}<td class="mono">${res}</td></tr>`;
+      <td class="mono">${m.ea.toFixed(1)}–${m.eh.toFixed(1)}</td><td class="mono">${(m.ea + m.eh).toFixed(1)}</td><td class="mono">${pc(m.p2)} · ${pc(m.px)} · ${pc(m.p1)}</td>
+      <td class="mono">${odd(m.p2)}</td><td class="mono">${odd(m.px)}</td><td class="mono">${odd(m.p1)}</td><td class="mono">${m.pm != null ? odd(1 - m.pm) + " · " + odd(m.pm) : "–"}</td>${edgeCells(m)}<td class="mono">${res}</td></tr>`;
   }).join("") : G.games.map((m) => {
     const res = m.hs != null ? `${m.as_}–${m.hs} <span class="${(m.ph > 0.5) === (m.hs > m.as_) ? "ok" : "no"}">${(m.ph > 0.5) === (m.hs > m.as_) ? "✓" : "✗"}</span>` : "–";
     const fa = m.ph < 0.5, fh = m.ph > 0.5;
     const mkt = nfl ? `<td class="mono">${esc(line(m.sp, m.h))}<span class="sub">total ${m.tot ?? "–"} · ${ml2dec(m.mla) ? ml2dec(m.mla).toFixed(2) : "–"} / ${ml2dec(m.mlh) ? ml2dec(m.mlh).toFixed(2) : "–"}</span></td>` : "";
     return `<tr><td class="l"><span class="sub">${esc(tfmt(m.t))}</span><span class="${fa ? "fav" : ""}">${esc(m.a)}</span> @ <span class="${fh ? "fav" : ""}">${esc(m.h)}</span></td>
-      <td class="mono">${m.ea.toFixed(1)}–${m.eh.toFixed(1)}</td><td class="mono">${(m.ea + m.eh).toFixed(1)}</td><td class="mono">${pc(m.ph)}</td>
+      <td class="mono">${m.ea.toFixed(1)}–${m.eh.toFixed(1)}</td><td class="mono">${(m.ea + m.eh).toFixed(1)}</td><td class="mono">${pc(1 - m.ph)} · ${pc(m.ph)}</td>
       <td class="mono">${odd(1 - m.ph)}</td><td class="mono">${odd(m.ph)}</td>${mkt}${edgeCells(m)}<td class="mono">${res}</td></tr>`;
   }).join("")}
   </tbody></table></div></div>
   <p class="note" style="margin-top:12px">${esc(NOTES[s.key] || "")} The model knows nothing about injuries, rest or lineups.</p>
-  <p class="note">Book 1 · 2: the bookmaker's home and away moneyline as decimal odds, ${nfl ? "from nflverse (the closing line once a game is played)" : "DraftKings via ESPN, the last price we saw before the game started; prices appear on the day of the game"}${three ? ", overtime and shootout included, so it is compared with our odds incl. OT" : ""}. Edge 1 / 2: our chance × that price − 1, for the home (1) and away (2) side; green from +5%. The bookmaker's margin is in its prices, so most edges are negative.</p>
+  <p class="note">Every column reads away first, then home, in the same order as "away @ home" and the result. Book: the bookmaker's away and home moneyline as decimal odds, ${nfl ? "from nflverse (the closing line once a game is played)" : "DraftKings via ESPN, the last price we saw before the game started; prices appear on the day of the game"}${three ? ", overtime and shootout included, so it is compared with our odds incl. OT" : ""}. Edge: our chance × that price − 1, for the away and the home side; green from +5%. The bookmaker's margin is in its prices, so most edges are negative.</p>
   ${D.errors && D.errors.length ? `<p class="note">Update problems: ${D.errors.map(esc).join(" · ")}</p>` : ""}`;
 }
 app.addEventListener("click", (e) => {
