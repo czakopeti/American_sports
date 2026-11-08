@@ -8,14 +8,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from sports import data, model
+from sports import data, market, model
 
 
 def _num(v, d=2):
     return None if v is None or (isinstance(v, float) and math.isnan(v)) else round(float(v), d)
 
 
-def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int) -> dict:
+def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: dict | None = None, notes: list | None = None) -> dict:
     sc = cfg["sports"][key]
     cur, prev = data.nfl(sc, ua, today) if key == "nfl" else data.daily(key, sc, ua, today, min_home)
     if sc.get("three_way"):
@@ -39,6 +39,16 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int) -> dict
             k = (draw_rate * (1 - mean_d)) / (mean_d * (1 - draw_rate))
             tot = P.p1 + k * P.px + P.p2
             P["p1"], P["px"], P["p2"] = P.p1 / tot, k * P.px / tot, P.p2 / tot
+    store = {} if store is None else store
+    if sc.get("espn_path"):
+        # Bookmaker moneylines for games not started yet; a failure only costs today's prices.
+        mine = [{"t": r.kickoff, "h": r.home, "a": r.away} for r in P.itertuples()]
+        try:
+            market.refresh(store, key, sc["espn_path"], mine, sc.get("espn_aliases", {}), ua, today, datetime.now(timezone.utc))
+        except Exception as exc:  # noqa: BLE001
+            if notes is not None:
+                notes.append(f"{sc['label']} bookmaker prices: {exc}")
+    book = store.get(key, {})
     groups = []
     for grp, g in P.groupby("group", sort=True):
         games = []
@@ -48,6 +58,18 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int) -> dict
                 item.update(as_=int(r.as_), hs=int(r.hs))
             if key == "nfl":
                 item.update(sp=_num(r.spread, 1), tot=_num(r.total, 1), mla=_num(r.ml_away, 0), mlh=_num(r.ml_home, 0))
+                bh, ba = market.ml_to_decimal(item["mlh"]), market.ml_to_decimal(item["mla"])
+                if bh and ba:
+                    item.update(bh=bh, ba=ba)
+            else:
+                b = book.get(market.key({"t": r.kickoff, "a": r.away, "h": r.home}))
+                if b:
+                    item.update(bh=b["bh"], ba=b["ba"])
+            # Our home chance for the bookmaker's market: the moneyline, overtime included.
+            pm = r.ph
+            if sc.get("three_way"):
+                pm = r.p1 + sc.get("overtime_home_share", 0.5) * r.px
+            item["pm"] = _num(pm, 4)
             if sc.get("three_way"):
                 item.update(p1=_num(r.p1, 4), px=_num(r.px, 4), p2=_num(r.p2, 4))
                 if r.done:
@@ -81,11 +103,14 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int) -> dict
 
 def build(root: Path, cfg: dict, today: date) -> dict:
     out = {"updated": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"), "sports": [], "errors": []}
+    store_path = root / "data" / "market.json"
+    store = market.load(store_path)
     for key in cfg["sports"]:
         try:
-            out["sports"].append(sport_json(key, cfg, cfg["user_agent"], today, cfg["min_home_games_for_team"]))
+            out["sports"].append(sport_json(key, cfg, cfg["user_agent"], today, cfg["min_home_games_for_team"], store, out["errors"]))
         except Exception as exc:  # noqa: BLE001 - one league failing must not hide the others
             out["errors"].append(f"{cfg['sports'][key]['label']}: {exc}")
+    market.save(store_path, store)
     return out
 
 

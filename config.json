@@ -1,5 +1,5 @@
 {
-  "documentation": "Tuning constants and sources. Seasons, teams, fixtures, scores and home advantage are read from the data on every run. Settings were chosen on the previous season, each day or week predicted only from earlier games.",
+  "documentation": "Tuning constants and sources. Seasons, teams, fixtures, scores and home advantage are read from the data on every run. Settings were chosen on the previous season, each day or week predicted only from earlier games. Bookmaker moneylines: NFL from nflverse; NBA and NHL from ESPN's scoreboard (DraftKings), saved before each game starts in data/market.json.",
   "user_agent": "American-sports-odds/1.0 (personal weekly/daily build; +https://github.com/czakopeti/American_sports)",
   "sports": {
     "nfl": {
@@ -20,7 +20,9 @@
       "prior_weight": 10,
       "home_advantage": "previous_season",
       "margin_sd": 14.6,
-      "unit": "points"
+      "unit": "points",
+      "espn_path": "basketball/nba",
+      "espn_aliases": {}
     },
     "nhl": {
       "label": "NHL",
@@ -32,7 +34,14 @@
       "overtime_home_share": 0.5,
       "unit": "goals",
       "period_feed": "https://api-web.nhle.com/v1/schedule/{date}",
-      "three_way": true
+      "three_way": true,
+      "espn_path": "hockey/nhl",
+      "espn_aliases": {
+        "NJ": "NJD",
+        "SJ": "SJS",
+        "TB": "TBL",
+        "LA": "LAK"
+      }
     }
   },
   "min_home_games_for_team": 10
