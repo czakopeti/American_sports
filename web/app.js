@@ -14,14 +14,16 @@ const glabel = (s, g) => (s.group_kind === "week" ? `Week ${g}` : dfmt(g));
 const line = (sp, home) => (sp == null ? "–" : sp > 0 ? `${home} −${sp}` : sp < 0 ? `${home} +${-sp}` : "pick");
 const pct = (x) => (x > 0 ? "+" : "") + (x * 100).toFixed(1) + "%";
 // Everything reads away first, home second, like "away @ home".
-// Bookmaker away and home prices and our edge on each: our chance × the price − 1.
+// Bookmaker away and home prices, the win chances in them (margin taken out), and our chance minus theirs.
+const pp = (x) => (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x * 100).toFixed(1);
 const edgeCells = (m) => {
-  if (!m.bh || !m.ba || m.pm == null) return `<td class="mono">–</td><td class="mono">–</td>`;
-  const e = [(1 - m.pm) * m.ba - 1, m.pm * m.bh - 1];
-  const c = (x) => `<span class="${x >= 0.05 ? "ok" : ""}">${pct(x)}</span>`;
-  return `<td class="mono">${m.ba.toFixed(2)} · ${m.bh.toFixed(2)}</td><td class="mono">${c(e[0])} / ${c(e[1])}</td>`;
+  if (!m.bh || !m.ba || m.pm == null) return `<td class="mono">–</td><td class="mono">–</td><td class="mono">–</td>`;
+  const ia = 1 / m.ba, ih = 1 / m.bh, ba = ia / (ia + ih), bh = ih / (ia + ih);
+  const g = [(1 - m.pm) - ba, m.pm - bh];
+  const c = (x) => `<span class="${x >= 0.05 ? "ok" : ""}">${pp(x)}</span>`;
+  return `<td class="mono">${m.ba.toFixed(2)} · ${m.bh.toFixed(2)}</td><td class="mono">${pc(ba)} · ${pc(bh)}</td><td class="mono">${c(g[0])} / ${c(g[1])}</td>`;
 };
-const EDGE_TH = "<th>Book away · home</th><th>Edge away / home</th>";
+const EDGE_TH = "<th>Book odds<br>away · home</th><th>Book win %<br>away · home</th><th>Gap (points)<br>away / home</th>";
 const ml2dec = (ml) => (ml == null ? null : ml > 0 ? 1 + ml / 100 : 1 + 100 / -ml);
 const NOTES = {
   nfl: "Points scored and allowed, adjusted for the opponent. Last season counts as a few games of prior early on. Home advantage 2.6 points. Win chance from a normal spread of results (13.2-point standard deviation). The market line is the closing spread, total and moneyline from nflverse, shown for comparison.",
@@ -56,7 +58,7 @@ function render() {
     <select id="grp">${s.groups.map((x) => `<option value="${esc(x.g)}" ${x.g === G.g ? "selected" : ""}>${esc(glabel(s, x.g))}${x.g === today(s) ? (s.group_kind === "week" ? " (this week)" : " (today)") : ""}</option>`).join("")}</select>
     <button class="nav" data-step="1" ${gi === keys.length - 1 ? "disabled" : ""} aria-label="Next">›</button>
     <span class="note">${s.label} ${esc(s.season)} · ${three && s.reg_known ? `60-minute favourite right ${s.reg_fav_won} of ${s.reg_known} (${s.reg_draws} went to overtime)` : `favourite won ${s.fav_won} of ${s.played}`}${done.length && !three ? ` · this ${s.group_kind === "week" ? "week" : "day"}: ${favOk} of ${done.length}` : ""}</span></div>
-  <div class="panel"><div class="tw"><table><thead><tr><th class="l">Game (away @ home)</th><th>Expected</th><th>Total</th>${three ? "<th>Away · Draw · Home (60 min)</th><th>Odds away</th><th>Odds draw</th><th>Odds home</th><th>Ours incl. OT</th>" : "<th>Away · Home win</th><th>Odds away</th><th>Odds home</th>"}${nfl ? "<th>Market</th>" : ""}${EDGE_TH}<th>Result</th></tr></thead><tbody>
+  <div class="panel"><div class="tw"><table><thead><tr><th class="l">Game (away @ home)</th><th>Expected</th><th>Total</th>${three ? "<th>60 min<br>away · draw · home</th><th>Odds<br>away</th><th>Odds<br>draw</th><th>Odds<br>home</th><th>Ours incl. OT<br>away · home</th>" : "<th>Win %<br>away · home</th><th>Odds<br>away</th><th>Odds<br>home</th>"}${nfl ? "<th>Market</th>" : ""}${EDGE_TH}<th>Result</th></tr></thead><tbody>
   ${three ? G.games.map((m) => {
     const p = [m.p1, m.px, m.p2], pick = p.indexOf(Math.max(...p));
     const res = m.hs != null ? `${m.as_}–${m.hs}${m.pt && m.pt !== "REG" ? ` <span class="sub" style="display:inline">${esc(m.pt)}</span>` : ""}${m.reg != null ? ` <span class="${pick === m.reg ? "ok" : "no"}">${pick === m.reg ? "✓" : "✗"}</span>` : ""}` : "–";
@@ -73,7 +75,7 @@ function render() {
   }).join("")}
   </tbody></table></div></div>
   <p class="note" style="margin-top:12px">${esc(NOTES[s.key] || "")} The model knows nothing about injuries, rest or lineups.</p>
-  <p class="note">Every column reads away first, then home, in the same order as "away @ home" and the result. Book: the bookmaker's away and home moneyline as decimal odds, ${nfl ? "from nflverse (the closing line once a game is played)" : "DraftKings via ESPN, the last price we saw before the game started; prices appear on the day of the game"}${three ? ", overtime and shootout included, so it is compared with our odds incl. OT" : ""}. Edge: our chance × that price − 1, for the away and the home side; green from +5%. The bookmaker's margin is in its prices, so most edges are negative.</p>
+  <p class="note">Every column reads away first, then home, in the same order as "away @ home" and the result. Book: the bookmaker's away and home moneyline as decimal odds, ${nfl ? "from nflverse (the closing line once a game is played)" : "DraftKings via ESPN, the last price we saw before the game started; prices appear on the day of the game"}${three ? ", overtime and shootout included, so it is compared with our odds incl. OT" : ""}. Book win %: the chances in those prices with the bookmaker's margin taken out (1 ÷ odds, scaled to add up to 100%). Gap: our win chance minus the bookmaker's, in percentage points, for the away and the home side; green from +5 points.</p>
   ${D.errors && D.errors.length ? `<p class="note">Update problems: ${D.errors.map(esc).join(" · ")}</p>` : ""}`;
 }
 app.addEventListener("click", (e) => {
