@@ -21,6 +21,10 @@ Early in a season each club is pulled towards a share of last season's final rat
 The NBA and NHL settings were chosen on the 2025–26 season, each date predicted only from earlier dates.
 The model knows nothing about injuries, rest or lineups.
 
+## Bookmaker prices and edge
+Each game shows the bookmaker's home and away moneyline and our edge on each side: our chance × the price − 1.
+NFL prices come from nflverse. NBA and NHL prices are DraftKings moneylines from ESPN's scoreboard; ESPN drops them once a game starts, so every run saves the latest pre-game price in `data/market.json`. NHL moneylines include overtime and the shootout, so they are compared with our chance of winning the game, not the 60-minute three-way odds.
+
 ## Run locally
 ```
 pip install -r requirements.txt
