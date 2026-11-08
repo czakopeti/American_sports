@@ -1,84 +1,84 @@
 {
 "nba": {
 "2026-11-08|LAL|DET": {
-"at": "2026-11-08T16:34:37Z",
+"at": "2026-11-08T16:58:15Z",
 "ba": 2.6,
 "bh": 1.524,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-08|PHI|CHI": {
-"at": "2026-11-08T16:34:37Z",
+"at": "2026-11-08T16:58:15Z",
 "ba": 1.238,
 "bh": 4.29,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-09|BKN|DAL": {
-"at": "2026-11-08T16:34:37Z",
+"at": "2026-11-08T16:58:15Z",
 "ba": 3.61,
 "bh": 1.309,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-09|BOS|MIL": {
-"at": "2026-11-08T16:34:37Z",
+"at": "2026-11-08T16:58:15Z",
 "ba": 1.133,
 "bh": 6.3,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-09|MIA|SAC": {
-"at": "2026-11-08T16:34:37Z",
+"at": "2026-11-08T16:58:15Z",
 "ba": 1.224,
 "bh": 4.46,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-09|NO|LAC": {
-"at": "2026-11-08T16:34:37Z",
+"at": "2026-11-08T16:58:15Z",
 "ba": 1.826,
 "bh": 2.03,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-09|UTAH|MIN": {
-"at": "2026-11-08T16:34:37Z",
+"at": "2026-11-08T16:58:15Z",
 "ba": 5.7,
 "bh": 1.154,
-"book": "Draft Kings"
+"book": "DraftKings"
 }
 },
 "nhl": {
 "2026-11-08|FLA|BOS": {
-"at": "2026-11-08T16:34:47Z",
+"at": "2026-11-08T16:58:25Z",
 "ba": 2.24,
 "bh": 1.676,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-08|TBL|WPG": {
-"at": "2026-11-08T16:34:47Z",
+"at": "2026-11-08T16:58:25Z",
 "ba": 1.676,
 "bh": 2.24,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-08|VGK|BUF": {
-"at": "2026-11-08T16:34:47Z",
+"at": "2026-11-08T16:58:25Z",
 "ba": 1.893,
 "bh": 1.926,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-09|NJD|TOR": {
-"at": "2026-11-08T16:34:47Z",
+"at": "2026-11-08T16:58:25Z",
 "ba": 1.645,
 "bh": 2.3,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-09|PHI|CGY": {
-"at": "2026-11-08T16:34:47Z",
+"at": "2026-11-08T16:58:25Z",
 "ba": 1.847,
 "bh": 1.98,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-09|PIT|ANA": {
-"at": "2026-11-08T16:34:47Z",
+"at": "2026-11-08T16:58:25Z",
 "ba": 2.0,
 "bh": 1.833,
-"book": "Draft Kings"
+"book": "DraftKings"
 }
 }
 }
