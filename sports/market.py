@@ -12,6 +12,7 @@ from pathlib import Path
 from sports.data import _get
 
 SCOREBOARD = "https://site.api.espn.com/apis/site/v2/sports/{path}/scoreboard?dates={day}"
+CORE_ODDS = "https://sports.core.api.espn.com/v2/sports/{sport}/leagues/{league}/events/{id}/competitions/{id}/odds"
 
 
 def ml_to_decimal(ml) -> float | None:
@@ -44,6 +45,34 @@ def parse_scoreboard(j: dict) -> list[dict]:
     return out
 
 
+def finished_events(j: dict) -> list[dict]:
+    """Games ESPN marks as completed: event id, kickoff (UTC), ESPN home and away codes."""
+    out = []
+    for e in j.get("events", []):
+        c = (e.get("competitions") or [{}])[0]
+        if not (c.get("status") or e.get("status") or {}).get("type", {}).get("completed"):
+            continue
+        side = {t.get("homeAway"): t.get("team", {}).get("abbreviation") for t in c.get("competitors", [])}
+        if side.get("home") and side.get("away"):
+            t = datetime.strptime(e["date"].replace("Z", ""), "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+            out.append({"id": e["id"], "t": t.strftime("%Y-%m-%dT%H:%M:%SZ"), "home": side["home"], "away": side["away"]})
+    return out
+
+
+def closing_price(j: dict) -> dict | None:
+    """The closing moneyline of the first-priority bookmaker in ESPN's odds list for one game."""
+    items = sorted(j.get("items", []), key=lambda i: (i.get("provider") or {}).get("priority", 99))
+    for i in items:
+        def dec(side):
+            t = i.get(side) or {}
+            v = ((t.get("close") or {}).get("moneyLine") or {}).get("decimal")
+            return float(v) if v else ml_to_decimal(t.get("moneyLine"))
+        h, a = dec("homeTeamOdds"), dec("awayTeamOdds")
+        if h and a and h > 1 and a > 1:
+            return {"bh": round(h, 3), "ba": round(a, 3), "book": (i.get("provider") or {}).get("name", "")}
+    return None
+
+
 def match(rows: list[dict], games: list[dict], aliases: dict) -> list[tuple[dict, dict]]:
     """Pair ESPN rows with our games: same teams after the alias table, or, failing that,
     the one game of ours within three hours that shares at least one team code."""
@@ -58,6 +87,29 @@ def match(rows: list[dict], games: list[dict], aliases: dict) -> list[tuple[dict
         if g:
             pairs.append((r, g))
     return pairs
+
+
+def backfill(store: dict, sport: str, path: str, games: list[dict], aliases: dict, ua: str, today: date, days: int, now: datetime) -> int:
+    """Closing prices for the games of the last few days, so played games show the price just before the start.
+    A game that already has its closing price is not asked again."""
+    book = store.setdefault(sport, {})
+    league_sport, league = path.split("/")
+    n = 0
+    for k in range(days, -1, -1):
+        d = today - timedelta(days=k)
+        j = json.loads(_get(SCOREBOARD.format(path=path, day=d.strftime("%Y%m%d")), ua))
+        evs = finished_events(j)
+        for r, g in match(evs, games, aliases):
+            if book.get(key(g), {}).get("close"):
+                continue
+            try:
+                c = closing_price(json.loads(_get(CORE_ODDS.format(sport=league_sport, league=league, id=r["id"]), ua)))
+            except Exception:  # noqa: BLE001 - one game without odds must not stop the rest
+                c = None
+            if c:
+                book[key(g)] = {**c, "close": True, "at": now.strftime("%Y-%m-%dT%H:%M:%SZ")}
+                n += 1
+    return n
 
 
 def key(g: dict) -> str:

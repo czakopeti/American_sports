@@ -42,6 +42,27 @@ class MarketTest(unittest.TestCase):
             market.refresh(store, "nhl", "hockey/nhl", ours, {"TB": "TBL"}, "ua", date(2026, 11, 8), datetime(2026, 11, 8, 12, tzinfo=timezone.utc))
         self.assertEqual(store["nhl"]["2026-11-08|TBL|BOS"]["bh"], 1.676)
 
+    def test_closing_price_and_backfill(self):
+        core = {"items": [
+            {"provider": {"name": "Other", "priority": 2}, "homeTeamOdds": {"moneyLine": 100}, "awayTeamOdds": {"moneyLine": -120}},
+            {"provider": {"name": "DraftKings", "priority": 1},
+             "homeTeamOdds": {"moneyLine": 230, "close": {"moneyLine": {"decimal": 3.3}}},
+             "awayTeamOdds": {"moneyLine": -285, "close": {"moneyLine": {"decimal": 1.35}}}}]}
+        self.assertEqual(market.closing_price(core), {"bh": 3.3, "ba": 1.35, "book": "DraftKings"})
+        board = {"events": [{"id": "9", "date": "2026-11-05T00:00Z", "competitions": [{"status": {"type": {"completed": True}},
+                 "competitors": [{"homeAway": "home", "team": {"abbreviation": "NY"}}, {"homeAway": "away", "team": {"abbreviation": "BOS"}}]}]}]}
+        ours = [{"t": "2026-11-05T00:00:00Z", "h": "NY", "a": "BOS"}]
+        store = {"nba": {"2026-11-05|BOS|NY": {"bh": 3.0, "ba": 1.4, "book": "DraftKings", "at": "x"}}}
+        js = __import__("json")
+        fake = lambda url, ua: js.dumps(core if "core.api" in url else board).encode()  # noqa: E731
+        with mock.patch.object(market, "_get", side_effect=fake):
+            n = market.backfill(store, "nba", "basketball/nba", ours, {}, "ua", date(2026, 11, 8), 7, datetime(2026, 11, 8, tzinfo=timezone.utc))
+        self.assertEqual(store["nba"]["2026-11-05|BOS|NY"]["bh"], 3.3)  # the closing price replaces the earlier one
+        self.assertTrue(store["nba"]["2026-11-05|BOS|NY"]["close"])
+        self.assertEqual(n, 1)
+        with mock.patch.object(market, "_get", side_effect=fake):
+            self.assertEqual(market.backfill(store, "nba", "basketball/nba", ours, {}, "ua", date(2026, 11, 8), 7, datetime(2026, 11, 8, tzinfo=timezone.utc)), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

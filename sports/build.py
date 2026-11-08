@@ -44,7 +44,9 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
         # Bookmaker moneylines for games not started yet; a failure only costs today's prices.
         mine = [{"t": r.kickoff, "h": r.home, "a": r.away} for r in P.itertuples()]
         try:
-            market.refresh(store, key, sc["espn_path"], mine, sc.get("espn_aliases", {}), ua, today, datetime.now(timezone.utc))
+            now = datetime.now(timezone.utc)
+            market.refresh(store, key, sc["espn_path"], mine, sc.get("espn_aliases", {}), ua, today, now)
+            market.backfill(store, key, sc["espn_path"], mine, sc.get("espn_aliases", {}), ua, today, cfg.get("closing_price_days", 7), now)
         except Exception as exc:  # noqa: BLE001
             if notes is not None:
                 notes.append(f"{sc['label']} bookmaker prices: {exc}")
