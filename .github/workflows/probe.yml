@@ -1,0 +1,31 @@
+name: Odds probe
+on:
+  push:
+    branches: [odds-probe]
+    paths: [".github/workflows/probe.yml"]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch ESPN scoreboards
+        run: |
+          mkdir -p probe
+          UA="American-sports-odds/1.0 (personal build)"
+          for sp in "basketball/nba" "hockey/nhl" "football/nfl"; do
+            n=$(echo $sp | cut -d/ -f2)
+            for d in 20261108 20261109 20261101 20251108; do
+              curl -sS -A "$UA" "https://site.api.espn.com/apis/site/v2/sports/$sp/scoreboard?dates=$d" -o probe/${n}_$d.json || true
+            done
+          done
+          ev=$(python3 -c "import json;print(json.load(open('probe/nba_20261101.json'))['events'][0]['id'])" || true)
+          curl -sS -A "$UA" "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=$ev" -o probe/nba_summary_$ev.json || true
+          curl -sS -A "$UA" "https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events/$ev/competitions/$ev/odds" -o probe/nba_core_odds_$ev.json || true
+          ls -la probe
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add probe && git commit -m "probe data" && git push
