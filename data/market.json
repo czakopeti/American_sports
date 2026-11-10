@@ -463,40 +463,40 @@
 "close": true
 },
 "2026-11-11|BOS|PHI": {
-"at": "2026-11-10T12:23:38Z",
-"ba": 1.885,
-"bh": 1.952,
-"book": "DraftKings"
+"at": "2026-11-10T15:37:04Z",
+"ba": 1.855,
+"bh": 1.99,
+"book": "Draft Kings"
 },
 "2026-11-11|LAC|PHX": {
-"at": "2026-11-10T12:23:38Z",
+"at": "2026-11-10T15:37:04Z",
 "ba": 2.4,
 "bh": 1.599,
-"book": "DraftKings"
+"book": "Draft Kings"
 },
 "2026-11-11|MIA|UTAH": {
-"at": "2026-11-10T12:23:38Z",
-"ba": 1.253,
-"bh": 4.12,
-"book": "DraftKings"
+"at": "2026-11-10T15:37:04Z",
+"ba": 1.279,
+"bh": 3.86,
+"book": "Draft Kings"
 },
 "2026-11-11|MIL|NY": {
-"at": "2026-11-10T12:23:38Z",
-"ba": 7.9,
-"bh": 1.093,
-"book": "DraftKings"
+"at": "2026-11-10T15:37:04Z",
+"ba": 7.7,
+"bh": 1.096,
+"book": "Draft Kings"
 },
 "2026-11-11|OKC|POR": {
-"at": "2026-11-10T12:23:38Z",
-"ba": 1.704,
-"bh": 2.2,
-"book": "DraftKings"
+"at": "2026-11-10T15:37:04Z",
+"ba": 1.769,
+"bh": 2.1,
+"book": "Draft Kings"
 },
 "2026-11-11|ORL|SAC": {
-"at": "2026-11-10T12:23:38Z",
+"at": "2026-11-10T15:37:04Z",
 "ba": 1.437,
 "bh": 2.9,
-"book": "DraftKings"
+"book": "Draft Kings"
 }
 },
 "nhl": {
@@ -914,46 +914,46 @@
 "close": true
 },
 "2026-11-11|COL|TOR": {
-"at": "2026-11-10T12:23:47Z",
+"at": "2026-11-10T15:37:16Z",
 "ba": 1.645,
 "bh": 2.3,
-"book": "DraftKings"
+"book": "Draft Kings"
 },
 "2026-11-11|DET|STL": {
-"at": "2026-11-10T12:23:47Z",
+"at": "2026-11-10T15:37:16Z",
 "ba": 2.2,
 "bh": 1.704,
-"book": "DraftKings"
+"book": "Draft Kings"
 },
 "2026-11-11|FLA|CBJ": {
-"at": "2026-11-10T12:23:47Z",
-"ba": 1.87,
-"bh": 1.952,
-"book": "DraftKings"
+"at": "2026-11-10T15:37:16Z",
+"ba": 1.833,
+"bh": 2.0,
+"book": "Draft Kings"
 },
 "2026-11-11|MIN|MTL": {
-"at": "2026-11-10T12:23:47Z",
+"at": "2026-11-10T15:37:16Z",
 "ba": 1.8,
 "bh": 2.05,
-"book": "DraftKings"
+"book": "Draft Kings"
 },
 "2026-11-11|NJD|WPG": {
-"at": "2026-11-10T12:23:47Z",
-"ba": 1.676,
-"bh": 2.24,
-"book": "DraftKings"
+"at": "2026-11-10T15:37:16Z",
+"ba": 1.645,
+"bh": 2.3,
+"book": "Draft Kings"
 },
 "2026-11-11|NSH|LAK": {
-"at": "2026-11-10T12:23:47Z",
+"at": "2026-11-10T15:37:16Z",
 "ba": 2.14,
 "bh": 1.741,
-"book": "DraftKings"
+"book": "Draft Kings"
 },
 "2026-11-11|WSH|OTT": {
-"at": "2026-11-10T12:23:47Z",
-"ba": 2.1,
-"bh": 1.769,
-"book": "DraftKings"
+"at": "2026-11-10T15:37:16Z",
+"ba": 2.05,
+"bh": 1.8,
+"book": "Draft Kings"
 }
 }
 }
