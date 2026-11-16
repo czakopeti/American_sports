@@ -41,6 +41,21 @@ function today(s) {
   const up = s.groups.find((x) => x.g >= et);
   return up ? up.g : null;
 }
+const sgn = (x) => (x > 0 ? "+" : "") + x.toFixed(2);
+const tally = (L) => (L.length ? `${L.length} bets, ${L.filter((x) => x.won).length} won, <b>${sgn(L.reduce((a, x) => a + x.profit, 0))}</b> units (${pct(L.reduce((a, x) => a + x.profit, 0) / L.length)})` : "no bets yet");
+const badge = (s, m, side) => (m.pick === side && s.rule ? ` <span style="display:inline-block;padding:0 6px;border-radius:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:11px">${esc(s.rule.name)}</span>` : "");
+function ruleCard(s) {
+  const r = s.rule; if (!r) return "";
+  const live = r.record.filter((x) => x.t.slice(0, 10) >= r.tracking_from);
+  const recent = [...live].reverse().slice(0, 12);
+  return `<div class="panel" style="padding:12px 14px;margin:10px 0"><b>Rule ${esc(r.name)}</b>
+    <p class="note" style="margin-top:6px">${esc(r.text)} Paid at the bookmaker's price; the record uses the closing price.</p>
+    <p class="note" style="margin-top:6px">${esc(r.found)}</p>
+    <p class="note" style="margin-top:6px">From ${esc(dfmt(r.tracking_from))}, the real test: ${tally(live)}.</p>
+    <p class="note" style="margin-top:4px">This season with prices (from 1 November): ${tally(r.record)}.</p>
+    ${recent.length ? `<div class="tw"><table><thead><tr><th class="l">Pick</th><th>Price</th><th>Result</th><th>Profit</th></tr></thead><tbody>${recent.map((x) => `<tr><td class="l"><span class="sub">${esc(dfmt(x.t.slice(0, 10)))}</span>${esc(x.side === "a" ? x.a : x.h)} <span class="sub" style="display:inline">${x.side === "a" ? "away at " + esc(x.h) : "home v " + esc(x.a)}</span></td><td class="mono">${x.price.toFixed(2)}</td><td class="mono">${x.as_}–${x.hs}</td><td class="mono"><span class="${x.won ? "ok" : "no"}">${sgn(x.profit)}</span></td></tr>`).join("")}</tbody></table></div>` : ""}
+    <p class="note" style="margin-top:6px">The ${esc(r.name)} badge in the table marks the side to bet, using the latest price we have seen.</p></div>`;
+}
 function render() {
   const s = D.sports[S.sp];
   const keys = s.groups.map((x) => x.g);
@@ -58,6 +73,7 @@ function render() {
     <select id="grp">${s.groups.map((x) => `<option value="${esc(x.g)}" ${x.g === G.g ? "selected" : ""}>${esc(glabel(s, x.g))}${x.g === today(s) ? (s.group_kind === "week" ? " (this week)" : " (today)") : ""}</option>`).join("")}</select>
     <button class="nav" data-step="1" ${gi === keys.length - 1 ? "disabled" : ""} aria-label="Next">›</button>
     <span class="note">${s.label} ${esc(s.season)} · ${three && s.reg_known ? `60-minute favourite right ${s.reg_fav_won} of ${s.reg_known} (${s.reg_draws} went to overtime)` : `favourite won ${s.fav_won} of ${s.played}`}${done.length && !three ? ` · this ${s.group_kind === "week" ? "week" : "day"}: ${favOk} of ${done.length}` : ""}</span></div>
+  ${ruleCard(s)}
   <div class="panel"><div class="tw"><table><thead><tr><th class="l">Game (away @ home)</th><th>Expected</th><th>Total</th>${three ? "<th>60 min<br>away · draw · home</th><th>Odds<br>away</th><th>Odds<br>draw</th><th>Odds<br>home</th><th>Ours incl. OT<br>away · home</th>" : "<th>Win %<br>away · home</th><th>Odds<br>away</th><th>Odds<br>home</th>"}${nfl ? "<th>Market</th>" : ""}${EDGE_TH}<th>Result</th></tr></thead><tbody>
   ${three ? G.games.map((m) => {
     const p = [m.p1, m.px, m.p2], pick = p.indexOf(Math.max(...p));
@@ -69,7 +85,7 @@ function render() {
     const res = m.hs != null ? `${m.as_}–${m.hs} <span class="${(m.ph > 0.5) === (m.hs > m.as_) ? "ok" : "no"}">${(m.ph > 0.5) === (m.hs > m.as_) ? "✓" : "✗"}</span>` : "–";
     const fa = m.ph < 0.5, fh = m.ph > 0.5;
     const mkt = nfl ? `<td class="mono">${esc(line(m.sp, m.h))}<span class="sub">total ${m.tot ?? "–"} · ${ml2dec(m.mla) ? ml2dec(m.mla).toFixed(2) : "–"} / ${ml2dec(m.mlh) ? ml2dec(m.mlh).toFixed(2) : "–"}</span></td>` : "";
-    return `<tr><td class="l"><span class="sub">${esc(tfmt(m.t))}</span><span class="${fa ? "fav" : ""}">${esc(m.a)}</span> @ <span class="${fh ? "fav" : ""}">${esc(m.h)}</span></td>
+    return `<tr><td class="l"><span class="sub">${esc(tfmt(m.t))}</span><span class="${fa ? "fav" : ""}">${esc(m.a)}</span>${badge(s, m, "a")} @ <span class="${fh ? "fav" : ""}">${esc(m.h)}</span>${badge(s, m, "h")}</td>
       <td class="mono">${m.ea.toFixed(1)}–${m.eh.toFixed(1)}</td><td class="mono">${(m.ea + m.eh).toFixed(1)}</td><td class="mono">${pc(1 - m.ph)} · ${pc(m.ph)}</td>
       <td class="mono">${odd(1 - m.ph)}</td><td class="mono">${odd(m.ph)}</td>${mkt}${edgeCells(m)}<td class="mono">${res}</td></tr>`;
   }).join("")}

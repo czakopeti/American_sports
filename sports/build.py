@@ -15,6 +15,18 @@ def _num(v, d=2):
     return None if v is None or (isinstance(v, float) and math.isnan(v)) else round(float(v), d)
 
 
+def rule_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
+    """Our favourite, when the bookmaker (margin taken out) rates it between min_gap and max_gap above us."""
+    ih, ia = 1 / bh, 1 / ba
+    qh = ih / (ih + ia)
+    home = pm >= 0.5
+    ours, theirs = (pm, qh) if home else (1 - pm, 1 - qh)
+    gap = theirs - ours
+    if rule["min_gap"] <= gap < rule["max_gap"]:
+        return "h" if home else "a"
+    return None
+
+
 def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: dict | None = None, notes: list | None = None) -> dict:
     sc = cfg["sports"][key]
     cur, prev = data.nfl(sc, ua, today) if key == "nfl" else data.daily(key, sc, ua, today, min_home)
@@ -51,6 +63,8 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
             if notes is not None:
                 notes.append(f"{sc['label']} bookmaker prices: {exc}")
     book = store.get(key, {})
+    rule = sc.get("rule")
+    record = []
     groups = []
     for grp, g in P.groupby("group", sort=True):
         games = []
@@ -72,6 +86,15 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
             if sc.get("three_way"):
                 pm = r.p1 + sc.get("overtime_home_share", 0.5) * r.px
             item["pm"] = _num(pm, 4)
+            if rule and item.get("bh") and item.get("ba"):
+                pick = rule_pick(pm, item["bh"], item["ba"], rule)
+                if pick:
+                    item["pick"] = pick
+                    if r.done:
+                        won = (r.hs > r.as_) if pick == "h" else (r.as_ > r.hs)
+                        price = item["bh"] if pick == "h" else item["ba"]
+                        record.append({"t": r.kickoff, "a": r.away, "h": r.home, "side": pick, "price": price,
+                                       "as_": int(r.as_), "hs": int(r.hs), "won": bool(won), "profit": round(price - 1 if won else -1, 3)})
             if sc.get("three_way"):
                 item.update(p1=_num(r.p1, 4), px=_num(r.px, 4), p2=_num(r.p2, 4))
                 if r.done:
@@ -95,6 +118,8 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
         pick = known[["p1", "px", "p2"]].to_numpy().argmax(axis=1)
         extra = {"reg_known": int(len(known)), "reg_fav_won": int((pick == reg.astype(int).to_numpy()).sum()),
                  "reg_draws": int(known.pt.isin(["OT", "SO"]).sum())}
+    if rule:
+        extra["rule"] = {k: v for k, v in rule.items()} | {"record": record}
     season = int(cur.season.iloc[0])
     label = f"{season}" if key == "nfl" else f"{season - 1}–{str(season)[-2:]}"
     return {"key": key, "label": sc["label"], "season": label, "unit": sc["unit"], "group_kind": sc["group"],
