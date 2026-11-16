@@ -673,10 +673,11 @@
 "close": true
 },
 "2026-11-15|CHA|LAC": {
-"at": "2026-11-15T20:24:08Z",
-"ba": 1.901,
-"bh": 1.943,
-"book": "DraftKings"
+"at": "2026-11-16T12:21:10Z",
+"ba": 2.0,
+"bh": 1.84,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-15|CHI|MIN": {
 "at": "2026-11-15T12:20:54Z",
@@ -686,10 +687,11 @@
 "close": true
 },
 "2026-11-15|DAL|BOS": {
-"at": "2026-11-15T20:24:08Z",
-"ba": 6.99,
-"bh": 1.114,
-"book": "DraftKings"
+"at": "2026-11-16T12:21:10Z",
+"ba": 7.4,
+"bh": 1.1,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-15|DAL|CLE": {
 "at": "2026-11-15T12:20:54Z",
@@ -713,46 +715,101 @@
 "close": true
 },
 "2026-11-15|IND|PHI": {
-"at": "2026-11-15T14:46:10Z",
-"ba": 3.21,
-"bh": 1.37,
-"book": "DraftKings"
+"at": "2026-11-16T12:21:10Z",
+"ba": 3.35,
+"bh": 1.34,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-15|LAL|PHX": {
-"at": "2026-11-15T20:24:08Z",
-"ba": 1.621,
+"at": "2026-11-16T12:21:10Z",
+"ba": 1.62,
 "bh": 2.36,
-"book": "DraftKings"
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-15|NY|TOR": {
-"at": "2026-11-15T20:24:08Z",
-"ba": 1.463,
-"bh": 2.79,
-"book": "DraftKings"
+"at": "2026-11-16T12:21:10Z",
+"ba": 1.57,
+"bh": 2.46,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-15|SA|UTAH": {
-"at": "2026-11-15T20:24:08Z",
-"ba": 1.085,
-"bh": 8.4,
-"book": "DraftKings"
+"at": "2026-11-16T12:21:10Z",
+"ba": 1.09,
+"bh": 7.9,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-16|ATL|MIL": {
-"at": "2026-11-15T20:24:08Z",
-"ba": 1.309,
-"bh": 3.61,
-"book": "DraftKings"
+"at": "2026-11-16T12:21:10Z",
+"ba": 1.28,
+"bh": 3.81,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-16|HOU|WSH": {
-"at": "2026-11-15T20:24:08Z",
-"ba": 1.307,
-"bh": 3.62,
-"book": "DraftKings"
+"at": "2026-11-16T12:21:10Z",
+"ba": 1.27,
+"bh": 3.86,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-16|OKC|SAC": {
-"at": "2026-11-15T20:24:08Z",
-"ba": 1.214,
-"bh": 4.61,
-"book": "DraftKings"
+"at": "2026-11-16T12:21:10Z",
+"ba": 1.16,
+"bh": 5.58,
+"book": "Draft Kings",
+"close": true
+},
+"2026-11-17|CHI|CLE": {
+"at": "2026-11-16T12:21:10Z",
+"ba": 3.96,
+"bh": 1.268,
+"book": "Draft Kings"
+},
+"2026-11-17|GS|NO": {
+"at": "2026-11-16T12:21:10Z",
+"ba": 1.658,
+"bh": 2.28,
+"book": "Draft Kings"
+},
+"2026-11-17|HOU|MIA": {
+"at": "2026-11-16T12:21:10Z",
+"ba": 1.769,
+"bh": 2.1,
+"book": "Draft Kings"
+},
+"2026-11-17|MEM|WSH": {
+"at": "2026-11-16T12:21:10Z",
+"ba": 1.578,
+"bh": 2.46,
+"book": "Draft Kings"
+},
+"2026-11-17|ORL|BOS": {
+"at": "2026-11-16T12:21:10Z",
+"ba": 4.0,
+"bh": 1.265,
+"book": "Draft Kings"
+},
+"2026-11-17|PHI|BKN": {
+"at": "2026-11-16T12:21:10Z",
+"ba": 1.422,
+"bh": 2.96,
+"book": "Draft Kings"
+},
+"2026-11-17|PHX|DEN": {
+"at": "2026-11-16T12:21:10Z",
+"ba": 4.43,
+"bh": 1.227,
+"book": "Draft Kings"
+},
+"2026-11-17|POR|MIN": {
+"at": "2026-11-16T12:21:10Z",
+"ba": 2.14,
+"bh": 1.741,
+"book": "Draft Kings"
 }
 },
 "nhl": {
@@ -1450,46 +1507,51 @@
 "close": true
 },
 "2026-11-16|CGY|ANA": {
-"at": "2026-11-15T20:24:15Z",
+"at": "2026-11-16T12:21:20Z",
 "ba": 2.3,
-"bh": 1.645,
-"book": "DraftKings"
+"bh": 1.64,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-16|EDM|PHI": {
-"at": "2026-11-15T20:24:15Z",
-"ba": 1.676,
-"bh": 2.24,
-"book": "DraftKings"
+"at": "2026-11-16T12:21:20Z",
+"ba": 1.74,
+"bh": 2.14,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-16|FLA|DAL": {
-"at": "2026-11-15T20:24:15Z",
+"at": "2026-11-16T12:21:20Z",
 "ba": 2.1,
-"bh": 1.769,
-"book": "DraftKings"
+"bh": 1.76,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-16|NSH|SJS": {
-"at": "2026-11-15T20:24:15Z",
-"ba": 1.588,
+"at": "2026-11-16T12:21:20Z",
+"ba": 1.58,
 "bh": 2.42,
-"book": "DraftKings"
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-16|VAN|VGK": {
-"at": "2026-11-15T20:24:15Z",
-"ba": 4.2,
-"bh": 1.244,
-"book": "DraftKings"
+"at": "2026-11-16T12:21:20Z",
+"ba": 4.4,
+"bh": 1.22,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-17|MTL|NYR": {
-"at": "2026-11-15T20:24:15Z",
-"ba": 1.952,
-"bh": 1.87,
-"book": "DraftKings"
+"at": "2026-11-16T12:21:20Z",
+"ba": 1.87,
+"bh": 1.952,
+"book": "Draft Kings"
 },
 "2026-11-17|VAN|UTA": {
-"at": "2026-11-15T20:24:15Z",
+"at": "2026-11-16T12:21:20Z",
 "ba": 3.7,
 "bh": 1.294,
-"book": "DraftKings"
+"book": "Draft Kings"
 }
 }
 }
