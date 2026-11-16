@@ -764,52 +764,52 @@
 "close": true
 },
 "2026-11-17|CHI|CLE": {
-"at": "2026-11-16T12:21:10Z",
-"ba": 3.96,
-"bh": 1.268,
-"book": "Draft Kings"
+"at": "2026-11-16T17:02:05Z",
+"ba": 3.86,
+"bh": 1.279,
+"book": "DraftKings"
 },
 "2026-11-17|GS|NO": {
-"at": "2026-11-16T12:21:10Z",
-"ba": 1.658,
-"bh": 2.28,
-"book": "Draft Kings"
+"at": "2026-11-16T17:02:05Z",
+"ba": 1.645,
+"bh": 2.31,
+"book": "DraftKings"
 },
 "2026-11-17|HOU|MIA": {
-"at": "2026-11-16T12:21:10Z",
-"ba": 1.769,
-"bh": 2.1,
-"book": "Draft Kings"
+"at": "2026-11-16T17:02:05Z",
+"ba": 1.676,
+"bh": 2.24,
+"book": "DraftKings"
 },
 "2026-11-17|MEM|WSH": {
-"at": "2026-11-16T12:21:10Z",
-"ba": 1.578,
-"bh": 2.46,
-"book": "Draft Kings"
+"at": "2026-11-16T17:02:05Z",
+"ba": 1.621,
+"bh": 2.36,
+"book": "DraftKings"
 },
 "2026-11-17|ORL|BOS": {
-"at": "2026-11-16T12:21:10Z",
-"ba": 4.0,
-"bh": 1.265,
-"book": "Draft Kings"
+"at": "2026-11-16T17:02:05Z",
+"ba": 3.87,
+"bh": 1.278,
+"book": "DraftKings"
 },
 "2026-11-17|PHI|BKN": {
-"at": "2026-11-16T12:21:10Z",
-"ba": 1.422,
-"bh": 2.96,
-"book": "Draft Kings"
+"at": "2026-11-16T17:02:05Z",
+"ba": 1.461,
+"bh": 2.8,
+"book": "DraftKings"
 },
 "2026-11-17|PHX|DEN": {
-"at": "2026-11-16T12:21:10Z",
-"ba": 4.43,
-"bh": 1.227,
-"book": "Draft Kings"
+"at": "2026-11-16T17:02:05Z",
+"ba": 4.2,
+"bh": 1.245,
+"book": "DraftKings"
 },
 "2026-11-17|POR|MIN": {
-"at": "2026-11-16T12:21:10Z",
+"at": "2026-11-16T17:02:05Z",
 "ba": 2.14,
 "bh": 1.741,
-"book": "Draft Kings"
+"book": "DraftKings"
 }
 },
 "nhl": {
@@ -1542,16 +1542,16 @@
 "close": true
 },
 "2026-11-17|MTL|NYR": {
-"at": "2026-11-16T12:21:20Z",
+"at": "2026-11-16T17:02:13Z",
 "ba": 1.87,
 "bh": 1.952,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-17|VAN|UTA": {
-"at": "2026-11-16T12:21:20Z",
+"at": "2026-11-16T17:02:13Z",
 "ba": 3.7,
 "bh": 1.294,
-"book": "Draft Kings"
+"book": "DraftKings"
 }
 }
 }
