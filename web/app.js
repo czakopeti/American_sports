@@ -44,6 +44,14 @@ function today(s) {
 const sgn = (x) => (x > 0 ? "+" : "") + x.toFixed(2);
 const tally = (L) => (L.length ? `${L.length} bets, ${L.filter((x) => x.won).length} won, <b>${sgn(L.reduce((a, x) => a + x.profit, 0))}</b> units (${pct(L.reduce((a, x) => a + x.profit, 0) / L.length)})` : "no bets yet");
 const badge = (s, m, side) => (m.pick === side && s.rule ? ` <span style="display:inline-block;padding:0 6px;border-radius:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:11px">${esc(s.rule.name)}</span>` : "");
+// Skip: the bookmaker (margin taken out) rates our favourite at least 10 points lower than we do.
+// In two seasons our favourite then won only 38-43% of the time, and neither side paid reliably.
+const skipGap = (m) => {
+  if (!m.bh || !m.ba || m.pm == null) return null;
+  const ih = 1 / m.bh, ia = 1 / m.ba, qh = ih / (ih + ia), home = m.pm >= 0.5;
+  return (home ? qh - m.pm : (1 - qh) - (1 - m.pm));
+};
+const skipTag = (m) => { const g = skipGap(m); return g != null && g <= -0.10 ? ` <span style="display:inline-block;padding:0 6px;border-radius:5px;border:1px solid var(--bad);color:var(--bad);font-weight:800;font-size:11px">SKIP</span>` : ""; };
 function ruleCard(s) {
   const r = s.rule; if (!r) return "";
   const live = r.record.filter((x) => x.t.slice(0, 10) >= r.tracking_from);
@@ -78,20 +86,21 @@ function render() {
   ${three ? G.games.map((m) => {
     const p = [m.p1, m.px, m.p2], pick = p.indexOf(Math.max(...p));
     const res = m.hs != null ? `${m.as_}–${m.hs}${m.pt && m.pt !== "REG" ? ` <span class="sub" style="display:inline">${esc(m.pt)}</span>` : ""}${m.reg != null ? ` <span class="${pick === m.reg ? "ok" : "no"}">${pick === m.reg ? "✓" : "✗"}</span>` : ""}` : "–";
-    return `<tr><td class="l"><span class="sub">${esc(tfmt(m.t))}</span><span class="${pick === 2 ? "fav" : ""}">${esc(m.a)}</span> @ <span class="${pick === 0 ? "fav" : ""}">${esc(m.h)}</span></td>
+    return `<tr><td class="l"><span class="sub">${esc(tfmt(m.t))}</span><span class="${pick === 2 ? "fav" : ""}">${esc(m.a)}</span> @ <span class="${pick === 0 ? "fav" : ""}">${esc(m.h)}</span>${skipTag(m)}</td>
       <td class="mono">${m.ea.toFixed(1)}–${m.eh.toFixed(1)}</td><td class="mono">${(m.ea + m.eh).toFixed(1)}</td><td class="mono">${pc(m.p2)} · ${pc(m.px)} · ${pc(m.p1)}</td>
       <td class="mono">${odd(m.p2)}</td><td class="mono">${odd(m.px)}</td><td class="mono">${odd(m.p1)}</td><td class="mono">${m.pm != null ? odd(1 - m.pm) + " · " + odd(m.pm) : "–"}</td>${edgeCells(m)}<td class="mono">${res}</td></tr>`;
   }).join("") : G.games.map((m) => {
     const res = m.hs != null ? `${m.as_}–${m.hs} <span class="${(m.ph > 0.5) === (m.hs > m.as_) ? "ok" : "no"}">${(m.ph > 0.5) === (m.hs > m.as_) ? "✓" : "✗"}</span>` : "–";
     const fa = m.ph < 0.5, fh = m.ph > 0.5;
     const mkt = nfl ? `<td class="mono">${esc(line(m.sp, m.h))}<span class="sub">total ${m.tot ?? "–"} · ${ml2dec(m.mla) ? ml2dec(m.mla).toFixed(2) : "–"} / ${ml2dec(m.mlh) ? ml2dec(m.mlh).toFixed(2) : "–"}</span></td>` : "";
-    return `<tr><td class="l"><span class="sub">${esc(tfmt(m.t))}</span><span class="${fa ? "fav" : ""}">${esc(m.a)}</span>${badge(s, m, "a")} @ <span class="${fh ? "fav" : ""}">${esc(m.h)}</span>${badge(s, m, "h")}</td>
+    return `<tr><td class="l"><span class="sub">${esc(tfmt(m.t))}</span><span class="${fa ? "fav" : ""}">${esc(m.a)}</span>${badge(s, m, "a")} @ <span class="${fh ? "fav" : ""}">${esc(m.h)}</span>${badge(s, m, "h")}${skipTag(m)}</td>
       <td class="mono">${m.ea.toFixed(1)}–${m.eh.toFixed(1)}</td><td class="mono">${(m.ea + m.eh).toFixed(1)}</td><td class="mono">${pc(1 - m.ph)} · ${pc(m.ph)}</td>
       <td class="mono">${odd(1 - m.ph)}</td><td class="mono">${odd(m.ph)}</td>${mkt}${edgeCells(m)}<td class="mono">${res}</td></tr>`;
   }).join("")}
   </tbody></table></div></div>
   <p class="note" style="margin-top:12px">${esc(NOTES[s.key] || "")} The model knows nothing about injuries, rest or lineups.</p>
   <p class="note">Every column reads away first, then home, in the same order as "away @ home" and the result. Book: the bookmaker's away and home moneyline as decimal odds, ${nfl ? "from nflverse (the closing line once a game is played)" : "DraftKings via ESPN: the closing price for games played in the last week and since, the latest price for games to come (prices appear on the day of the game)"}${three ? ", overtime and shootout included, so it is compared with our odds incl. OT" : ""}. Book win %: the chances in those prices with the bookmaker's margin taken out (1 ÷ odds, scaled to add up to 100%). Gap: our win chance minus the bookmaker's, in percentage points, for the away and the home side; green from +5 points.</p>
+  <p class="note">SKIP: the bookmaker rates our favourite at least 10 points lower than we do (margin taken out). Usually a missing or rested player we cannot see. Over the last two seasons our favourite then won only 38–43% of the time, and betting either side did not pay reliably, so leave these games alone.</p>
   ${D.errors && D.errors.length ? `<p class="note">Update problems: ${D.errors.map(esc).join(" · ")}</p>` : ""}`;
 }
 app.addEventListener("click", (e) => {
