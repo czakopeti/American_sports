@@ -22,7 +22,15 @@
       "margin_sd": 14.6,
       "unit": "points",
       "espn_path": "basketball/nba",
-      "espn_aliases": {}
+      "espn_aliases": {},
+      "rule": {
+        "name": "F",
+        "min_gap": 0.05,
+        "max_gap": 0.1,
+        "tracking_from": "2026-11-17",
+        "text": "Bet our favourite when the bookmaker's chance for it (margin taken out) is 5 to 10 points higher than ours. When the market rates our favourite even higher than we do, it usually wins more often than either of us says; much further apart, something like a missing star is usually behind it.",
+        "found": "Found on closing DraftKings prices: last season 246 bets, +7.0%; this season to 16 November 40 bets, +5.1% (286 bets, 81% won, average odds 1.33, +19.2 units). Many rules were tried to find it, so treat it as a test."
+      }
     },
     "nhl": {
       "label": "NHL",
