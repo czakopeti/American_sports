@@ -52,7 +52,7 @@ function ruleCard(s) {
     <p class="note" style="margin-top:6px">${esc(r.text)} Paid at the bookmaker's price; the record uses the closing price.</p>
     <p class="note" style="margin-top:6px">${esc(r.found)}</p>
     <p class="note" style="margin-top:6px">From ${esc(dfmt(r.tracking_from))}, the real test: ${tally(live)}.</p>
-    <p class="note" style="margin-top:4px">This season with prices (from 1 November): ${tally(r.record)}.</p>
+    <p class="note" style="margin-top:4px">This season so far${s.key === "nfl" ? "" : ", games with prices (from 1 November)"}: ${tally(r.record)}.</p>
     ${recent.length ? `<div class="tw"><table><thead><tr><th class="l">Pick</th><th>Price</th><th>Result</th><th>Profit</th></tr></thead><tbody>${recent.map((x) => `<tr><td class="l"><span class="sub">${esc(dfmt(x.t.slice(0, 10)))}</span>${esc(x.side === "a" ? x.a : x.h)} <span class="sub" style="display:inline">${x.side === "a" ? "away at " + esc(x.h) : "home v " + esc(x.a)}</span></td><td class="mono">${x.price.toFixed(2)}</td><td class="mono">${x.as_}–${x.hs}</td><td class="mono"><span class="${x.won ? "ok" : "no"}">${sgn(x.profit)}</span></td></tr>`).join("")}</tbody></table></div>` : ""}
     <p class="note" style="margin-top:6px">The ${esc(r.name)} badge in the table marks the side to bet, using the latest price we have seen.</p></div>`;
 }
