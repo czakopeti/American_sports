@@ -117,10 +117,12 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
                 if pick:
                     item["pick"] = pick
                     if r.done:
-                        won = (r.hs > r.as_) if pick == "h" else (r.as_ > r.hs)
+                        # The moneyline counts overtime and the shootout, so NHL games are settled on the final score.
+                        hs, as_ = int(getattr(r, "fhs", r.hs)), int(getattr(r, "fas", r.as_))
+                        won = (hs > as_) if pick == "h" else (as_ > hs)
                         price = item["bh"] if pick == "h" else item["ba"]
                         record.append({"t": r.kickoff, "a": r.away, "h": r.home, "side": pick, "price": price,
-                                       "as_": int(r.as_), "hs": int(r.hs), "won": bool(won), "profit": round(price - 1 if won else -1, 3)})
+                                       "as_": as_, "hs": hs, "won": bool(won), "profit": round(price - 1 if won else -1, 3)})
             if sc.get("three_way"):
                 item.update(p1=_num(r.p1, 4), px=_num(r.px, 4), p2=_num(r.p2, 4))
                 if r.done:
