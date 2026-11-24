@@ -11,6 +11,15 @@
       "home_advantage": 2.6,
       "margin_sd": 13.2,
       "unit": "points",
+      "rule": {
+        "name": "A",
+        "side": "a",
+        "min_gap": 0.01,
+        "max_gap": 1.0,
+        "tracking_from": "2026-11-24",
+        "text": "Bet our favourite when it is the away team and the bookmaker's chance for it (margin taken out) is at least 1 point higher than ours.",
+        "found": "Checked on closing moneylines with the EPA model, each week predicted only from earlier weeks: this season to week 11, 27 bets, 24 won, +24%; last season 43 bets, +9.8%. Low prices (about 1.40), so one loss costs a lot. On the page for testing only."
+      },
       "epa": true
     },
     "nba": {
