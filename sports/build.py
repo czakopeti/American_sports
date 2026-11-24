@@ -18,7 +18,7 @@ def _num(v, d=2):
 def side_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
     """A rule on one named side ("bet": "h" or "a"), read off the numbers as the table shows them
     (one decimal): our chance incl. overtime above "min_ours" (%), and the gap (ours minus the
-    bookmaker's, margin taken out, in points) above "gap_above" and/or below "gap_below"."""
+    bookmaker's, margin taken out, in points) above "gap_above", below "gap_below" or at most "gap_at_most"."""
     ih, ia = 1 / bh, 1 / ba
     qh = ih / (ih + ia)
     side = rule["bet"]
@@ -30,6 +30,8 @@ def side_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
     if "gap_above" in rule and not g > rule["gap_above"]:
         return None
     if "gap_below" in rule and not g < rule["gap_below"]:
+        return None
+    if "gap_at_most" in rule and not g <= rule["gap_at_most"]:
         return None
     return side
 
