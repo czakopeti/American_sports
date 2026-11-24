@@ -43,7 +43,9 @@ function today(s) {
 }
 const sgn = (x) => (x > 0 ? "+" : "") + x.toFixed(2);
 const tally = (L) => (L.length ? `${L.length} bets, ${L.filter((x) => x.won).length} won, <b>${sgn(L.reduce((a, x) => a + x.profit, 0))}</b> units (${pct(L.reduce((a, x) => a + x.profit, 0) / L.length)})` : "no bets yet");
-const badge = (s, m, side) => (m.pick === side && s.rule ? ` <span style="display:inline-block;padding:0 6px;border-radius:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:11px">${esc(s.rule.name)}</span>` : "");
+const rulesOf = (s) => s.rules || (s.rule ? [s.rule] : []);
+const picksOf = (m) => m.picks || [];
+const badge = (s, m, side) => picksOf(m).filter((p) => p[1] === side).map((p) => ` <span style="display:inline-block;padding:0 6px;border-radius:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:11px">${esc(p[0])}</span>`).join("");
 // Skip: the bookmaker (margin taken out) rates our favourite at least 10 points lower than we do.
 // In two seasons our favourite then won only 38-43% of the time, and neither side paid reliably.
 const skipGap = (m) => {
@@ -52,17 +54,18 @@ const skipGap = (m) => {
   return (home ? qh - m.pm : (1 - qh) - (1 - m.pm));
 };
 // Not on the NFL page: since the EPA model, the gap there has its own reading.
-const skipTag = (m) => { if (D.sports[S.sp].key === "nfl") return ""; const g = skipGap(m); return g != null && g <= -0.10 ? ` <span style="display:inline-block;padding:0 6px;border-radius:5px;border:1px solid var(--bad);color:var(--bad);font-weight:800;font-size:11px">SKIP</span>` : ""; };
-function ruleCard(s) {
-  const r = s.rule; if (!r) return "";
+const skipTag = (m) => { if (["nfl", "nhl"].includes(D.sports[S.sp].key)) return ""; const g = skipGap(m); return g != null && g <= -0.10 ? ` <span style="display:inline-block;padding:0 6px;border-radius:5px;border:1px solid var(--bad);color:var(--bad);font-weight:800;font-size:11px">SKIP</span>` : ""; };
+function ruleCard(s) { return rulesOf(s).map((r) => oneRule(s, r)).join(""); }
+function oneRule(s, r) {
+  const reg = r.market === "reg";
   const live = r.record.filter((x) => x.t.slice(0, 10) >= r.tracking_from);
   const recent = [...live].reverse().slice(0, 12);
-  return `<div class="panel" style="padding:12px 14px;margin:10px 0"><b>Rule ${esc(r.name)}</b>
-    <p class="note" style="margin-top:6px">${esc(r.text)} Paid at the bookmaker's price; the record uses the closing price.</p>
+  return `<div class="panel" style="padding:12px 14px;margin:10px 0"><b>Rule ${esc(r.name)}${reg ? " · 60 minutes" : ""}</b>
+    <p class="note" style="margin-top:6px">${esc(r.text)} ${reg ? "Settled on the 60-minute result at our own 60-minute odds." : "Paid at the bookmaker's price; the record uses the closing price."}</p>
     <p class="note" style="margin-top:6px">${esc(r.found)}</p>
     <p class="note" style="margin-top:6px">From ${esc(dfmt(r.tracking_from))}, the real test: ${tally(live)}.</p>
     <p class="note" style="margin-top:4px">This season so far: ${tally(r.record)}.</p>
-    ${recent.length ? `<div class="tw"><table><thead><tr><th class="l">Pick</th><th>Price</th><th>Result</th><th>Profit</th></tr></thead><tbody>${recent.map((x) => `<tr><td class="l"><span class="sub">${esc(dfmt(x.t.slice(0, 10)))}</span>${esc(x.side === "a" ? x.a : x.h)} <span class="sub" style="display:inline">${x.side === "a" ? "away at " + esc(x.h) : "home v " + esc(x.a)}</span></td><td class="mono">${x.price.toFixed(2)}</td><td class="mono">${x.as_}–${x.hs}</td><td class="mono"><span class="${x.won ? "ok" : "no"}">${sgn(x.profit)}</span></td></tr>`).join("")}</tbody></table></div>` : ""}
+    ${recent.length ? `<div class="tw"><table><thead><tr><th class="l">Pick</th><th>Price</th><th>Result</th><th>Profit</th></tr></thead><tbody>${recent.map((x) => `<tr><td class="l"><span class="sub">${esc(dfmt(x.t.slice(0, 10)))}</span>${esc(x.side === "a" ? x.a : x.h)} <span class="sub" style="display:inline">${x.side === "a" ? "away at " + esc(x.h) : "home v " + esc(x.a)}</span></td><td class="mono">${x.price.toFixed(2)}</td><td class="mono">${x.as_}–${x.hs}${x.pt ? ` <span class="sub" style="display:inline">${esc(x.pt)}</span>` : ""}</td><td class="mono"><span class="${x.won ? "ok" : "no"}">${sgn(x.profit)}</span></td></tr>`).join("")}</tbody></table></div>` : ""}
     <p class="note" style="margin-top:6px">The ${esc(r.name)} badge in the table marks the side to bet, using the latest price we have seen.</p></div>`;
 }
 // Excel export: every week (or day) of the season for the open league, away first like the table.
@@ -76,6 +79,7 @@ function exportRows(s) {
   if (nfl) head.push("Market spread", "Market total");
   head.push("Book odds away", "Book odds home", "Book win % away", "Book win % home", "Gap away (pts)", "Gap home (pts)", "Score away", "Score home", "Winner", "Our favourite", "Favourite won");
   if (three) head.push("Ended");
+  if (rulesOf(s).length) head.push("Rule");
   const rows = [head];
   for (const g of s.groups) for (const m of g.games) {
     const ka = new Date(m.t);
@@ -89,6 +93,7 @@ function exportRows(s) {
     const played = m.hs != null, win = played ? (m.hs > m.as_ ? m.h : m.as_ > m.hs ? m.a : "tie") : "";
     r.push(m.ba ? r2(m.ba) : "", m.bh ? r2(m.bh) : "", ba, bh, ga, gh, played ? m.as_ : "", played ? m.hs : "", win, fav, played && fav ? (win === fav ? "yes" : "no") : "");
     if (three) r.push(m.pt || "");
+    if (rulesOf(s).length) r.push(picksOf(m).map((p) => `${p[0]} ${p[1] === "h" ? "home" : "away"}`).join(", "));
     rows.push(r);
   }
   return rows;
@@ -145,7 +150,7 @@ function render() {
   ${three ? G.games.map((m) => {
     const p = [m.p1, m.px, m.p2], pick = p.indexOf(Math.max(...p));
     const res = m.hs != null ? `${m.as_}–${m.hs}${m.pt && m.pt !== "REG" ? ` <span class="sub" style="display:inline">${esc(m.pt)}</span>` : ""}${m.reg != null ? ` <span class="${pick === m.reg ? "ok" : "no"}">${pick === m.reg ? "✓" : "✗"}</span>` : ""}` : "–";
-    return `<tr><td class="l"><span class="sub">${esc(tfmt(m.t))}</span><span class="${pick === 2 ? "fav" : ""}">${esc(m.a)}</span> @ <span class="${pick === 0 ? "fav" : ""}">${esc(m.h)}</span>${skipTag(m)}</td>
+    return `<tr><td class="l"><span class="sub">${esc(tfmt(m.t))}</span><span class="${pick === 2 ? "fav" : ""}">${esc(m.a)}</span>${badge(s, m, "a")} @ <span class="${pick === 0 ? "fav" : ""}">${esc(m.h)}</span>${badge(s, m, "h")}${skipTag(m)}</td>
       <td class="mono">${m.ea.toFixed(1)}–${m.eh.toFixed(1)}</td><td class="mono">${(m.ea + m.eh).toFixed(1)}</td><td class="mono">${pc(m.p2)} · ${pc(m.px)} · ${pc(m.p1)}</td>
       <td class="mono">${odd(m.p2)}</td><td class="mono">${odd(m.px)}</td><td class="mono">${odd(m.p1)}</td><td class="mono">${m.pm != null ? odd(1 - m.pm) + " · " + odd(m.pm) : "–"}</td>${edgeCells(m)}<td class="mono">${res}</td></tr>`;
   }).join("") : G.games.map((m) => {
@@ -159,7 +164,7 @@ function render() {
   </tbody></table></div></div>
   <p class="note" style="margin-top:12px">${esc(NOTES[s.key] || "")} The model knows nothing about injuries, rest or lineups.</p>
   <p class="note">Every column reads away first, then home, in the same order as "away @ home" and the result. Book: the bookmaker's away and home moneyline as decimal odds, ${nfl ? "from nflverse (the closing line once a game is played)" : "DraftKings via ESPN: the closing price for games played in the last week and since, the latest price for games to come (prices appear on the day of the game)"}${three ? ", overtime and shootout included, so it is compared with our odds incl. OT" : ""}. Book win %: the chances in those prices with the bookmaker's margin taken out (1 ÷ odds, scaled to add up to 100%). Gap: our win chance minus the bookmaker's, in percentage points, for the away and the home side; green from +5 points.</p>
-  ${nfl ? "" : `<p class="note">SKIP: the bookmaker rates our favourite at least 10 points lower than we do (margin taken out). Usually a missing or rested player we cannot see. Over the last two seasons our favourite then won only 38–43% of the time, and betting either side did not pay reliably, so leave these games alone.</p>`}
+  ${nfl || three ? "" : `<p class="note">SKIP: the bookmaker rates our favourite at least 10 points lower than we do (margin taken out). Usually a missing or rested player we cannot see. Over the last two seasons our favourite then won only 38–43% of the time, and betting either side did not pay reliably, so leave these games alone.</p>`}
   ${D.errors && D.errors.length ? `<p class="note">Update problems: ${D.errors.map(esc).join(" · ")}</p>` : ""}`;
 }
 app.addEventListener("click", (e) => {

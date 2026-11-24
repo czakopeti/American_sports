@@ -15,6 +15,25 @@ def _num(v, d=2):
     return None if v is None or (isinstance(v, float) and math.isnan(v)) else round(float(v), d)
 
 
+def side_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
+    """A rule on one named side ("bet": "h" or "a"), read off the numbers as the table shows them
+    (one decimal): our chance incl. overtime above "min_ours" (%), and the gap (ours minus the
+    bookmaker's, margin taken out, in points) above "gap_above" and/or below "gap_below"."""
+    ih, ia = 1 / bh, 1 / ba
+    qh = ih / (ih + ia)
+    side = rule["bet"]
+    ours = pm if side == "h" else 1 - pm
+    book = qh if side == "h" else 1 - qh
+    o, g = round(ours * 100, 1), round((ours - book) * 100, 1)
+    if "min_ours" in rule and not o > rule["min_ours"]:
+        return None
+    if "gap_above" in rule and not g > rule["gap_above"]:
+        return None
+    if "gap_below" in rule and not g < rule["gap_below"]:
+        return None
+    return side
+
+
 def rule_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
     """Our favourite, when the bookmaker (margin taken out) rates it between min_gap and max_gap above us.
 
@@ -89,8 +108,8 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
             if notes is not None:
                 notes.append(f"{sc['label']} bookmaker prices: {exc}")
     book = store.get(key, {})
-    rule = sc.get("rule")
-    record = []
+    rules = sc.get("rules") or ([sc["rule"]] if sc.get("rule") else [])
+    records: list[list] = [[] for _ in rules]
     groups = []
     for grp, g in P.groupby("group", sort=True):
         games = []
@@ -112,17 +131,32 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
             if sc.get("three_way"):
                 pm = r.p1 + sc.get("overtime_home_share", 0.5) * r.px
             item["pm"] = _num(pm, 4)
-            if rule and item.get("bh") and item.get("ba"):
-                pick = rule_pick(pm, item["bh"], item["ba"], rule)
-                if pick:
-                    item["pick"] = pick
-                    if r.done:
-                        # The moneyline counts overtime and the shootout, so NHL games are settled on the final score.
-                        hs, as_ = int(getattr(r, "fhs", r.hs)), int(getattr(r, "fas", r.as_))
-                        won = (hs > as_) if pick == "h" else (as_ > hs)
-                        price = item["bh"] if pick == "h" else item["ba"]
-                        record.append({"t": r.kickoff, "a": r.away, "h": r.home, "side": pick, "price": price,
-                                       "as_": as_, "hs": hs, "won": bool(won), "profit": round(price - 1 if won else -1, 3)})
+            for rule, record in zip(rules, records):
+                if not (item.get("bh") and item.get("ba")):
+                    break
+                pick = (side_pick if "bet" in rule else rule_pick)(pm, item["bh"], item["ba"], rule)
+                if not pick:
+                    continue
+                item.setdefault("picks", []).append([rule["name"], pick])
+                if not r.done:
+                    continue
+                # Final score: overtime and shootout included (NHL, where hs/as_ hold the regulation score).
+                hs, as_ = int(getattr(r, "fhs", r.hs)), int(getattr(r, "fas", r.as_))
+                pt = getattr(r, "pt", None)
+                if rule.get("market") == "reg":
+                    # The 60-minute result, paid at our own 60-minute odds (no bookmaker three-way prices here).
+                    if not isinstance(pt, str):
+                        continue
+                    won = pt not in ("OT", "SO") and ((hs > as_) if pick == "h" else (as_ > hs))
+                    price = round(1 / (r.p1 if pick == "h" else r.p2), 3)
+                else:
+                    won = (hs > as_) if pick == "h" else (as_ > hs)
+                    price = item["bh"] if pick == "h" else item["ba"]
+                rec = {"t": r.kickoff, "a": r.away, "h": r.home, "side": pick, "price": price,
+                       "as_": as_, "hs": hs, "won": bool(won), "profit": round(price - 1 if won else -1, 3)}
+                if isinstance(pt, str) and pt != "REG":
+                    rec["pt"] = pt
+                record.append(rec)
             if sc.get("three_way"):
                 item.update(p1=_num(r.p1, 4), px=_num(r.px, 4), p2=_num(r.p2, 4))
                 if r.done:
@@ -146,8 +180,8 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
         pick = known[["p1", "px", "p2"]].to_numpy().argmax(axis=1)
         extra = {"reg_known": int(len(known)), "reg_fav_won": int((pick == reg.astype(int).to_numpy()).sum()),
                  "reg_draws": int(known.pt.isin(["OT", "SO"]).sum())}
-    if rule:
-        extra["rule"] = {k: v for k, v in rule.items()} | {"record": record}
+    if rules:
+        extra["rules"] = [dict(rule) | {"record": record} for rule, record in zip(rules, records)]
     season = int(cur.season.iloc[0])
     label = f"{season}" if key == "nfl" else f"{season - 1}–{str(season)[-2:]}"
     return {"key": key, "label": sc["label"], "season": label, "unit": sc["unit"], "group_kind": sc["group"],
