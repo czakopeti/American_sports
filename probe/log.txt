@@ -1,0 +1,96 @@
+OK https://moneypuck.com/moneypuck/playerData/careers/gameByGame/all_teams.csv 128544355
+['team', 'season', 'name', 'gameId', 'playerTeam', 'opposingTeam', 'home_or_away', 'gameDate', 'position', 'situation', 'xGoalsPercentage', 'corsiPercentage', 'fenwickPercentage', 'iceTime', 'xOnGoalFor', 'xGoalsFor', 'xReboundsFor', 'xFreezeFor', 'xPlayStoppedFor', 'xPlayContinuedInZoneFor', 'xPlayContinuedOutsideZoneFor', 'flurryAdjustedxGoalsFor', 'scoreVenueAdjustedxGoalsFor', 'flurryScoreVenueAdjustedxGoalsFor', 'shotsOnGoalFor', 'missedShotsFor', 'blockedShotAttemptsFor', 'shotAttemptsFor', 'goalsFor', 'reboundsFor', 'reboundGoalsFor', 'freezeFor', 'playStoppedFor', 'playContinuedInZoneFor', 'playContinuedOutsideZoneFor', 'savedShotsOnGoalFor', 'savedUnblockedShotAttemptsFor', 'penaltiesFor', 'penalityMinutesFor', 'faceOffsWonFor', 'hitsFor', 'takeawaysFor', 'giveawaysFor', 'lowDangerShotsFor', 'mediumDangerShotsFor', 'highDangerShotsFor', 'lowDangerxGoalsFor', 'mediumDangerxGoalsFor', 'highDangerxGoalsFor', 'lowDangerGoalsFor', 'mediumDangerGoalsFor', 'highDangerGoalsFor', 'scoreAdjustedShotsAttemptsFor', 'unblockedShotAttemptsFor', 'scoreAdjustedUnblockedShotAttemptsFor', 'dZoneGiveawaysFor', 'xGoalsFromxReboundsOfShotsFor', 'xGoalsFromActualReboundsOfShotsFor', 'reboundxGoalsFor', 'totalShotCreditFor', 'scoreAdjustedTotalShotCreditFor', 'scoreFlurryAdjustedTotalShotCreditFor', 'xOnGoalAgainst', 'xGoalsAgainst', 'xReboundsAgainst', 'xFreezeAgainst', 'xPlayStoppedAgainst', 'xPlayContinuedInZoneAgainst', 'xPlayContinuedOutsideZoneAgainst', 'flurryAdjustedxGoalsAgainst', 'scoreVenueAdjustedxGoalsAgainst', 'flurryScoreVenueAdjustedxGoalsAgainst', 'shotsOnGoalAgainst', 'missedShotsAgainst', 'blockedShotAttemptsAgainst', 'shotAttemptsAgainst', 'goalsAgainst', 'reboundsAgainst', 'reboundGoalsAgainst', 'freezeAgainst', 'playStoppedAgainst', 'playContinuedInZoneAgainst', 'playContinuedOutsideZoneAgainst', 'savedShotsOnGoalAgainst', 'savedUnblockedShotAttemptsAgainst', 'penaltiesAgainst', 'penalityMinutesAgainst', 'faceOffsWonAgainst', 'hitsAgainst', 'takeawaysAgainst', 'giveawaysAgainst', 'lowDangerShotsAgainst', 'mediumDangerShotsAgainst', 'highDangerShotsAgainst', 'lowDangerxGoalsAgainst', 'mediumDangerxGoalsAgainst', 'highDangerxGoalsAgainst', 'lowDangerGoalsAgainst', 'mediumDangerGoalsAgainst', 'highDangerGoalsAgainst', 'scoreAdjustedShotsAttemptsAgainst', 'unblockedShotAttemptsAgainst', 'scoreAdjustedUnblockedShotAttemptsAgainst', 'dZoneGiveawaysAgainst', 'xGoalsFromxReboundsOfShotsAgainst', 'xGoalsFromActualReboundsOfShotsAgainst', 'reboundxGoalsAgainst', 'totalShotCreditAgainst', 'scoreAdjustedTotalShotCreditAgainst', 'scoreFlurryAdjustedTotalShotCreditAgainst', 'playoffGame']
+                                                    0           1           2
+team                                              NYR         NYR         NYR
+season                                           2008        2008        2008
+name                                              NYR         NYR         NYR
+gameId                                     2008020001  2008020001  2008020001
+playerTeam                                        NYR         NYR         NYR
+opposingTeam                                      T.B         T.B         T.B
+home_or_away                                     AWAY        AWAY        AWAY
+gameDate                                     20081004    20081004    20081004
+position                                   Team Level  Team Level  Team Level
+situation                                       other         all        5on5
+xGoalsPercentage                                  0.0      0.4596      0.4857
+corsiPercentage                                   0.0      0.6408      0.6429
+fenwickPercentage                                 0.0       0.631      0.6364
+iceTime                                          42.0      3600.0      2283.0
+xOnGoalFor                                        0.0      37.733      24.802
+xGoalsFor                                         0.0       2.287       1.693
+xReboundsFor                                      0.0       2.842       1.724
+xFreezeFor                                        0.0       8.155       5.513
+xPlayStoppedFor                                   0.0       1.134       0.739
+xPlayContinuedInZoneFor                           0.0       22.53       14.65
+xPlayContinuedOutsideZoneFor                      0.0      16.054      10.681
+flurryAdjustedxGoalsFor                           0.0       2.249       1.656
+scoreVenueAdjustedxGoalsFor                       0.0       2.396       1.803
+flurryScoreVenueAdjustedxGoalsFor                 0.0       2.357       1.764
+shotsOnGoalFor                                    0.0        41.0        28.0
+missedShotsFor                                    0.0        12.0         7.0
+blockedShotAttemptsFor                            0.0        13.0        10.0
+shotAttemptsFor                                   0.0        66.0        45.0
+goalsFor                                          0.0         2.0         1.0
+reboundsFor                                       0.0         1.0         0.0
+reboundGoalsFor                                   0.0         0.0         0.0
+freezeFor                                         0.0        14.0        10.0
+playStoppedFor                                    0.0         2.0         1.0
+playContinuedInZoneFor                            0.0        18.0        14.0
+playContinuedOutsideZoneFor                       0.0        16.0         9.0
+savedShotsOnGoalFor                               0.0        39.0        27.0
+savedUnblockedShotAttemptsFor                     0.0        51.0        34.0
+penaltiesFor                        
+season
+2023    14000
+2024    13980
+2025    13940
+2026     3770
+Name: count, dtype: int64
+situation
+other    47198
+all      47198
+5on5     47198
+4on5     47198
+5on4     47198
+Name: count, dtype: int64
+saved (31690, 111)
+OK https://moneypuck.com/moneypuck/playerData/seasonSummary/2026/regular/teams.csv 92225
+['team', 'season', 'name', 'team.1', 'position', 'situation', 'games_played', 'xGoalsPercentage', 'corsiPercentage', 'fenwickPercentage', 'iceTime', 'xOnGoalFor', 'xGoalsFor', 'xReboundsFor', 'xFreezeFor', 'xPlayStoppedFor', 'xPlayContinuedInZoneFor', 'xPlayContinuedOutsideZoneFor', 'flurryAdjustedxGoalsFor', 'scoreVenueAdjustedxGoalsFor', 'flurryScoreVenueAdjustedxGoalsFor', 'shotsOnGoalFor', 'missedShotsFor', 'blockedShotAttemptsFor', 'shotAttemptsFor', 'goalsFor', 'reboundsFor', 'reboundGoalsFor', 'freezeFor', 'playStoppedFor', 'playContinuedInZoneFor', 'playContinuedOutsideZoneFor', 'savedShotsOnGoalFor', 'savedUnblockedShotAttemptsFor', 'penaltiesFor', 'penalityMinutesFor', 'faceOffsWonFor', 'hitsFor', 'takeawaysFor', 'giveawaysFor', 'lowDangerShotsFor', 'mediumDangerShotsFor', 'highDangerShotsFor', 'lowDangerxGoalsFor', 'mediumDangerxGoalsFor', 'highDangerxGoalsFor', 'lowDangerGoalsFor', 'mediumDangerGoalsFor', 'highDangerGoalsFor', 'scoreAdjustedShotsAttemptsFor', 'unblockedShotAttemptsFor', 'scoreAdjustedUnblockedShotAttemptsFor', 'dZoneGiveawaysFor', 'xGoalsFromxReboundsOfShotsFor', 'xGoalsFromActualReboundsOfShotsFor', 'reboundxGoalsFor', 'totalShotCreditFor', 'scoreAdjustedTotalShotCreditFor', 'scoreFlurryAdjustedTotalShotCreditFor', 'xOnGoalAgainst', 'xGoalsAgainst', 'xReboundsAgainst', 'xFreezeAgainst', 'xPlayStoppedAgainst', 'xPlayContinuedInZoneAgainst', 'xPlayContinuedOutsideZoneAgainst', 'flurryAdjustedxGoalsAgainst', 'scoreVenueAdjustedxGoalsAgainst', 'flurryScoreVenueAdjustedxGoalsAgainst', 'shotsOnGoalAgainst', 'missedShotsAgainst', 'blockedShotAttemptsAgainst', 'shotAttemptsAgainst', 'goalsAgainst', 'reboundsAgainst', 'reboundGoalsAgainst', 'freezeAgainst', 'playStoppedAgainst', 'playContinuedInZoneAgainst', 'playContinuedOutsideZoneAgainst', 'savedShotsOnGoalAgainst', 'savedUnblockedShotAttemptsAgainst', 'penaltiesAgainst', 'penalityMinutesAgainst', 'faceOffsWonAgainst', 'hitsAgainst', 'takeawaysAgainst', 'giveawaysAgainst', 'lowDangerShotsAgainst', 'mediumDangerShotsAgainst', 'highDangerShotsAgainst', 'lowDangerxGoalsAgainst', 'mediumDangerxGoalsAgainst', 'highDangerxGoalsAgainst', 'lowDangerGoalsAgainst', 'mediumDangerGoalsAgainst', 'highDangerGoalsAgainst', 'scoreAdjustedShotsAttemptsAgainst', 'unblockedShotAttemptsAgainst', 'scoreAdjustedUnblockedShotAttemptsAgainst', 'dZoneGiveawaysAgainst', 'xGoalsFromxReboundsOfShotsAgainst', 'xGoalsFromActualReboundsOfShotsAgainst', 'reboundxGoalsAgainst', 'totalShotCreditAgainst', 'scoreAdjustedTotalShotCreditAgainst', 'scoreFlurryAdjustedTotalShotCreditAgainst']
+                                                    0           1           2
+team                                              NYI         NYI         NYI
+season                                           2026        2026        2026
+name                                              NYI         NYI         NYI
+team.1                                            NYI         NYI         NYI
+position                                   Team Level  Team Level  Team Level
+situation                                       other         all        5on5
+games_played                                       23          23          23
+xGoalsPercentage                                 0.32        0.47         0.5
+corsiPercentage                                  0.38        0.48        0.49
+fenwickPercentage                                0.36        0.48        0.49
+iceTime                                        2642.0     84092.0     68961.0
+xOnGoalFor                                      24.65      662.47       545.5
+xGoalsFor                                        4.83       67.42       50.51
+xReboundsFor                                     2.05       68.86       56.82
+xFreezeFor                                        3.2      113.37       97.27
+xPlayStoppedFor                                  0.14        1.78        1.34
+xPlayContinuedInZoneFor                         10.96      312.38      257.34
+xPlayContinuedOutsideZoneFor                    12.82      334.26      276.78
+flurryAdjustedxGoalsFor                          4.76       65.47       49.29
+scoreVenueAdjustedxGoalsFor                      4.83       68.22       51.31
+flurryScoreVenueAdjustedxGoalsFor                4.76       66.25       50.08
+shotsOnGoalFor                                   23.0       594.0       490.0
+missedShotsFor                                   11.0       305.0       251.0
+blockedShotAttemptsFor                           16.0       360.0       303.0
+shotAttemptsFor                                  50.0      1259.0      1044.0
+goalsFor                                          7.0        72.0        51.0
+reboundsFor                                       1.0        67.0        57.0
+reboundGoalsFor                                   0.0        11.0         9.0
+freezeFor                                         5.0       113.0        95.0
+playStoppedFor                                    0.0         0.0         0.0
+playContinuedInZoneFor                           12.0       317.0       259.0
+playContinuedOutsideZoneFor                       9.0       330.0       279.0
+savedShotsOnGoalFor                              16.0       522.0       439.0
+savedUnblockedShotAttemptsFor                    27.0       827.0       690.0
+penaltiesFor                                      5.0        83.0        70.0
+penalityMinutesFor                               10.0       194.0       168.0
+faceOffsWonFor                                   35.0       657.0       499.0
+hitsFor                             
