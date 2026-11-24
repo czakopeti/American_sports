@@ -68,7 +68,7 @@
         "max_gap": 0.02,
         "tracking_from": "2026-11-24",
         "text": "Bet the away team when our chance for it (overtime included) is above 52% and the bookmaker's chance (margin taken out) is less than 2 points above ours, or below ours.",
-        "found": "Picked from the November games on this page (1-23 November: 37 bets, 27 won, +29%). Over the whole season it is about even (to 15 November, 95 bets, -0.1%) and last season it lost (211 bets, -2.7%), so October went badly. On the page for testing only."
+      "found": "Picked from the November games on this page. Whole season with closing prices: October 53 bets, 27 won, -12%; 1-23 November 37 bets, 27 won, +29%; together 90 bets, +4.2 units (+4.6%), average price 1.78. Last season it lost (211 bets, -2.7%). On the page for testing only."
       },
       "xg": {
         "prior_share": 0.5,
@@ -77,5 +77,5 @@
     }
   },
   "min_home_games_for_team": 10,
-  "closing_price_days": 60
+  "closing_price_days": 7
 }
