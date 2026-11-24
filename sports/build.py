@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from sports import data, epa, market, model
+from sports import data, epa, market, model, nhl_xg
 
 
 def _num(v, d=2):
@@ -55,6 +55,13 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
         except Exception as exc:  # noqa: BLE001 - the points model still stands
             if notes is not None:
                 notes.append(f"{sc['label']} EPA model not used this time ({exc}); showing the points model")
+    if sc.get("xg"):
+        # NHL: expected goals and chances from opponent-adjusted expected goals (MoneyPuck.com).
+        try:
+            P, home = nhl_xg.apply(P, cur, prev, sc, ROOT_DIR, ua, notes)
+        except Exception as exc:  # noqa: BLE001 - the goals model still stands
+            if notes is not None:
+                notes.append(f"{sc['label']} expected-goals model not used this time ({exc}); showing the goals model")
     draw_rate = None
     if sc.get("three_way"):
         # Independent Poisson goals give too few regulation draws. Scale the draw chance so the
