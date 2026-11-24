@@ -21,7 +21,7 @@ def side_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
     bookmaker's, margin taken out, in points) above "gap_above", below "gap_below" or at most "gap_at_most"."""
     ih, ia = 1 / bh, 1 / ba
     qh = ih / (ih + ia)
-    side = rule["bet"]
+    side = rule.get("on", rule["bet"])  # the side whose numbers are read; the bet can be the other side
     ours = pm if side == "h" else 1 - pm
     book = qh if side == "h" else 1 - qh
     o, g = round(ours * 100, 1), round((ours - book) * 100, 1)
@@ -33,7 +33,7 @@ def side_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
         return None
     if "gap_at_most" in rule and not g <= rule["gap_at_most"]:
         return None
-    return side
+    return rule["bet"]
 
 
 def rule_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
