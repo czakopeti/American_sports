@@ -76,10 +76,10 @@
           "bet": "a",
           "market": "reg",
           "min_ours": 50,
-          "gap_above": 2,
+          "gap_below": 2,
           "tracking_from": "2026-11-25",
-          "text": "Bet the away team to win in regulation (60 minutes) when our chance for it, overtime included, is above 50% and the gap (ours minus the bookmaker's, margin taken out) is above +2 points, as the table shows them.",
-          "found": "Settled at our own 60-minute odds, as there are no bookmaker three-way prices here; a bookmaker usually pays a few percent less. On the moneyline these games lost this season (about -6%) and won a little last season (about +2%). On the page for testing only."
+          "text": "Bet the away team to win in regulation (60 minutes) when our chance for it, overtime included, is above 50% and the gap (ours minus the bookmaker's, margin taken out) is below +2 points, as the table shows them.",
+          "found": "Picked from this season's games: to 23 November 89 bets, 53 won in regulation. Settled at our own 60-minute odds, as there are no bookmaker three-way prices here; a bookmaker usually pays a few percent less. The same games on the moneyline won this season (about +7%) and lost last season (about -6%). On the page for testing only."
         }
       ],
       "xg": {
