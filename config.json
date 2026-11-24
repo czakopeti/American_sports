@@ -60,6 +60,16 @@
         "TB": "TBL",
         "LA": "LAK"
       },
+      "rule": {
+        "name": "N",
+        "side": "a",
+        "min_ours": 0.52,
+        "min_gap": -1.0,
+        "max_gap": 0.02,
+        "tracking_from": "2026-11-24",
+        "text": "Bet the away team when our chance for it (overtime included) is above 52% and the bookmaker's chance (margin taken out) is less than 2 points above ours, or below ours.",
+        "found": "Picked from the November games on this page (1-23 November: 36 bets, 27 won, +32%). Over the whole season it is about even (to 15 November, 95 bets, -0.1%) and last season it lost (211 bets, -2.7%), so October went badly. On the page for testing only."
+      },
       "xg": {
         "prior_share": 0.5,
         "prior_weight": 3
