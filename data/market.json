@@ -1177,10 +1177,11 @@
 "close": true
 },
 "2026-11-24|SA|SAC": {
-"at": "2026-11-23T19:15:08Z",
-"ba": 1.207,
-"bh": 4.71,
-"book": "DraftKings"
+"at": "2026-11-24T05:35:27Z",
+"ba": 1.32,
+"bh": 3.49,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-24|UTAH|LAL": {
 "at": "2026-11-23T19:15:08Z",
@@ -1189,22 +1190,22 @@
 "book": "DraftKings"
 },
 "2026-11-25|BOS|WSH": {
-"at": "2026-11-24T05:12:33Z",
+"at": "2026-11-24T05:35:27Z",
 "ba": 1.221,
 "bh": 4.51,
-"book": "DraftKings"
+"book": "Draft Kings"
 },
 "2026-11-25|DAL|DEN": {
-"at": "2026-11-24T05:12:33Z",
+"at": "2026-11-24T05:35:27Z",
 "ba": 3.6,
 "bh": 1.311,
-"book": "DraftKings"
+"book": "Draft Kings"
 },
 "2026-11-25|DET|ORL": {
-"at": "2026-11-24T05:12:33Z",
+"at": "2026-11-24T05:35:27Z",
 "ba": 1.769,
 "bh": 2.1,
-"book": "DraftKings"
+"book": "Draft Kings"
 }
 },
 "nhl": {
@@ -2266,10 +2267,11 @@
 "close": true
 },
 "2026-11-24|ANA|SEA": {
-"at": "2026-11-23T19:15:18Z",
+"at": "2026-11-24T05:35:37Z",
 "ba": 1.98,
-"bh": 1.847,
-"book": "DraftKings"
+"bh": 1.84,
+"book": "Draft Kings",
+"close": true
 },
 "2026-11-24|CBJ|NJD": {
 "at": "2026-11-24T05:12:41Z",
@@ -2313,10 +2315,10 @@
 "close": true
 },
 "2026-11-25|VGK|EDM": {
-"at": "2026-11-24T05:12:41Z",
+"at": "2026-11-24T05:35:37Z",
 "ba": 1.847,
 "bh": 1.98,
-"book": "DraftKings"
+"book": "Draft Kings"
 }
 }
 }
