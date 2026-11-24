@@ -54,7 +54,7 @@ const skipGap = (m) => {
   return (home ? qh - m.pm : (1 - qh) - (1 - m.pm));
 };
 // Not on the NFL page: since the EPA model, the gap there has its own reading.
-const skipTag = (m) => { if (["nfl", "nhl"].includes(D.sports[S.sp].key)) return ""; const g = skipGap(m); return g != null && g <= -0.10 ? ` <span style="display:inline-block;padding:0 6px;border-radius:5px;border:1px solid var(--bad);color:var(--bad);font-weight:800;font-size:11px">SKIP</span>` : ""; };
+const skipTag = (m) => { if (["nfl", "nhl", "nba"].includes(D.sports[S.sp].key)) return ""; const g = skipGap(m); return g != null && g <= -0.10 ? ` <span style="display:inline-block;padding:0 6px;border-radius:5px;border:1px solid var(--bad);color:var(--bad);font-weight:800;font-size:11px">SKIP</span>` : ""; };
 function ruleCard(s) { return rulesOf(s).map((r) => oneRule(s, r)).join(""); }
 function oneRule(s, r) {
   const reg = r.market === "reg";
@@ -164,7 +164,6 @@ function render() {
   </tbody></table></div></div>
   <p class="note" style="margin-top:12px">${esc(NOTES[s.key] || "")} The model knows nothing about injuries, rest or lineups.</p>
   <p class="note">Every column reads away first, then home, in the same order as "away @ home" and the result. Book: the bookmaker's away and home moneyline as decimal odds, ${nfl ? "from nflverse (the closing line once a game is played)" : "DraftKings via ESPN: the closing price for games played in the last week and since, the latest price for games to come (prices appear on the day of the game)"}${three ? ", overtime and shootout included, so it is compared with our odds incl. OT" : ""}. Book win %: the chances in those prices with the bookmaker's margin taken out (1 ÷ odds, scaled to add up to 100%). Gap: our win chance minus the bookmaker's, in percentage points, for the away and the home side; green from +5 points.</p>
-  ${nfl || three ? "" : `<p class="note">SKIP: the bookmaker rates our favourite at least 10 points lower than we do (margin taken out). Usually a missing or rested player we cannot see. Over the last two seasons our favourite then won only 38–43% of the time, and betting either side did not pay reliably, so leave these games alone.</p>`}
   ${D.errors && D.errors.length ? `<p class="note">Update problems: ${D.errors.map(esc).join(" · ")}</p>` : ""}`;
 }
 app.addEventListener("click", (e) => {

@@ -46,14 +46,28 @@
       "unit": "points",
       "espn_path": "basketball/nba",
       "espn_aliases": {},
-      "rule": {
-        "name": "F",
-        "min_gap": 0.05,
-        "max_gap": 0.1,
-        "tracking_from": "2026-11-17",
-        "text": "Bet our favourite when the bookmaker's chance for it (margin taken out) is 5 to 10 points higher than ours. When the market rates our favourite even higher than we do, it usually wins more often than either of us says; much further apart, something like a missing star is usually behind it.",
-        "found": "Found on closing DraftKings prices: last season 246 bets, +7.0%; this season to 16 November 40 bets, +5.1% (286 bets, 81% won, average odds 1.33, +19.2 units). Many rules were tried to find it, so treat it as a test."
-      }
+      "rules": [
+        {
+          "name": "B1",
+          "on": "h",
+          "bet": "a",
+          "min_ours": 50,
+          "gap_above": 10.1,
+          "tracking_from": "2026-11-25",
+          "text": "Bet the away team on the moneyline when our win chance for the home team is above 50% and the home gap (ours minus the bookmaker's, margin taken out) is above +10.1 points, as the table shows them: the bookmaker likes the home side far less than we do.",
+          "found": "Checked on closing moneylines: this season to 23 November 17 bets, 13 won, +6.8 units (+40%), average price 1.78; last season 69 bets, 37 won, -8.0 units (-12%). On the page for testing only."
+        },
+        {
+          "name": "B2",
+          "on": "a",
+          "bet": "h",
+          "min_ours": 50,
+          "gap_above": 12.1,
+          "tracking_from": "2026-11-25",
+          "text": "Bet the home team on the moneyline when our win chance for the away team is above 50% and the away gap (ours minus the bookmaker's, margin taken out) is above +12.1 points, as the table shows them: the bookmaker likes the away side far less than we do.",
+          "found": "Checked on closing moneylines: this season to 23 November 10 bets, 9 won, +4.2 units (+42%), average price 1.58; last season 45 bets, 25 won, -8.4 units (-19%). On the page for testing only."
+        }
+      ]
     },
     "nhl": {
       "label": "NHL",
