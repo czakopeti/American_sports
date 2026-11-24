@@ -11,14 +11,6 @@
       "home_advantage": 2.6,
       "margin_sd": 13.2,
       "unit": "points",
-      "rule": {
-        "name": "F",
-        "min_gap": 0.05,
-        "max_gap": 0.1,
-        "tracking_from": "2026-11-17",
-        "text": "Bet our favourite when the bookmaker's chance for it (margin taken out) is 5 to 10 points higher than ours. The same rule as on the NBA page.",
-        "found": "Checked with the earlier points model on closing moneylines: last season 44 bets, −1.2%; this season to 16 November 30 bets, +9.7%. Since 24 November the page uses the EPA model, so the record below is the EPA model's. On the page for testing only."
-      },
       "epa": true
     },
     "nba": {

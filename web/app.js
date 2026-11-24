@@ -51,7 +51,8 @@ const skipGap = (m) => {
   const ih = 1 / m.bh, ia = 1 / m.ba, qh = ih / (ih + ia), home = m.pm >= 0.5;
   return (home ? qh - m.pm : (1 - qh) - (1 - m.pm));
 };
-const skipTag = (m) => { const g = skipGap(m); return g != null && g <= -0.10 ? ` <span style="display:inline-block;padding:0 6px;border-radius:5px;border:1px solid var(--bad);color:var(--bad);font-weight:800;font-size:11px">SKIP</span>` : ""; };
+// Not on the NFL page: since the EPA model, the gap there has its own reading.
+const skipTag = (m) => { if (D.sports[S.sp].key === "nfl") return ""; const g = skipGap(m); return g != null && g <= -0.10 ? ` <span style="display:inline-block;padding:0 6px;border-radius:5px;border:1px solid var(--bad);color:var(--bad);font-weight:800;font-size:11px">SKIP</span>` : ""; };
 function ruleCard(s) {
   const r = s.rule; if (!r) return "";
   const live = r.record.filter((x) => x.t.slice(0, 10) >= r.tracking_from);
@@ -63,6 +64,63 @@ function ruleCard(s) {
     <p class="note" style="margin-top:4px">This season so far${s.key === "nfl" ? "" : ", games with prices (from 1 November)"}: ${tally(r.record)}.</p>
     ${recent.length ? `<div class="tw"><table><thead><tr><th class="l">Pick</th><th>Price</th><th>Result</th><th>Profit</th></tr></thead><tbody>${recent.map((x) => `<tr><td class="l"><span class="sub">${esc(dfmt(x.t.slice(0, 10)))}</span>${esc(x.side === "a" ? x.a : x.h)} <span class="sub" style="display:inline">${x.side === "a" ? "away at " + esc(x.h) : "home v " + esc(x.a)}</span></td><td class="mono">${x.price.toFixed(2)}</td><td class="mono">${x.as_}–${x.hs}</td><td class="mono"><span class="${x.won ? "ok" : "no"}">${sgn(x.profit)}</span></td></tr>`).join("")}</tbody></table></div>` : ""}
     <p class="note" style="margin-top:6px">The ${esc(r.name)} badge in the table marks the side to bet, using the latest price we have seen.</p></div>`;
+}
+// Excel export: every week (or day) of the season for the open league, away first like the table.
+const r1 = (x) => (x == null || !isFinite(x) ? "" : Math.round(x * 10) / 10);
+const r2 = (x) => (x == null || !isFinite(x) ? "" : Math.round(x * 100) / 100);
+function exportRows(s) {
+  const three = s.groups.some((g) => g.games.some((m) => m.p1 != null)), nfl = s.key === "nfl";
+  const head = [s.group_kind === "week" ? "Week" : "Date", "Kick-off", "Away", "Home", "Exp. away", "Exp. home", "Exp. total"];
+  if (three) head.push("60min away %", "60min draw %", "60min home %", "Odds away", "Odds draw", "Odds home", "Ours incl. OT away %", "Ours incl. OT home %");
+  else head.push("Our win % away", "Our win % home", "Odds away", "Odds home");
+  if (nfl) head.push("Market spread", "Market total");
+  head.push("Book odds away", "Book odds home", "Book win % away", "Book win % home", "Gap away (pts)", "Gap home (pts)", "Score away", "Score home", "Winner", "Our favourite", "Favourite won");
+  if (three) head.push("Ended");
+  const rows = [head];
+  for (const g of s.groups) for (const m of g.games) {
+    const ka = new Date(m.t);
+    const r = [s.group_kind === "week" ? +g.g : g.g, ka.toLocaleString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }), m.a, m.h, r1(m.ea), r1(m.eh), r1(m.ea + m.eh)];
+    let fav;
+    if (three) { r.push(r1(m.p2 * 100), r1(m.px * 100), r1(m.p1 * 100), r2(1 / m.p2), r2(1 / m.px), r2(1 / m.p1), m.pm != null ? r1((1 - m.pm) * 100) : "", m.pm != null ? r1(m.pm * 100) : ""); fav = m.pm != null ? (m.pm >= 0.5 ? m.h : m.a) : ""; }
+    else { r.push(r1((1 - m.ph) * 100), r1(m.ph * 100), r2(1 / (1 - m.ph)), r2(1 / m.ph)); fav = m.ph > 0.5 ? m.h : m.ph < 0.5 ? m.a : ""; }
+    if (nfl) r.push(m.sp == null ? "" : `${m.h} ${m.sp > 0 ? "-" : "+"}${Math.abs(m.sp)}`, m.tot ?? "");
+    let ba = "", bh = "", ga = "", gh = "";
+    if (m.bh && m.ba && m.pm != null) { const ia = 1 / m.ba, ih = 1 / m.bh; ba = ia / (ia + ih); bh = ih / (ia + ih); ga = r1(((1 - m.pm) - ba) * 100); gh = r1((m.pm - bh) * 100); ba = r1(ba * 100); bh = r1(bh * 100); }
+    const played = m.hs != null, win = played ? (m.hs > m.as_ ? m.h : m.as_ > m.hs ? m.a : "tie") : "";
+    r.push(m.ba ? r2(m.ba) : "", m.bh ? r2(m.bh) : "", ba, bh, ga, gh, played ? m.as_ : "", played ? m.hs : "", win, fav, played && fav ? (win === fav ? "yes" : "no") : "");
+    if (three) r.push(m.pt || "");
+    rows.push(r);
+  }
+  return rows;
+}
+function download(name, blob) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function loadXLSX() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((ok, no) => {
+    const sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+    sc.onload = () => (window.XLSX ? ok(window.XLSX) : no(new Error("no XLSX"))); sc.onerror = no;
+    document.head.appendChild(sc);
+  });
+}
+async function exportExcel() {
+  const s = D.sports[S.sp], rows = exportRows(s), name = `${s.label}_${s.season}_fair_odds`.replace(/[^A-Za-z0-9_]+/g, "-");
+  try {
+    const X = await loadXLSX();
+    const ws = X.utils.aoa_to_sheet(rows);
+    ws["!cols"] = rows[0].map((h, i) => ({ wch: Math.max(8, Math.min(22, Math.max(...rows.slice(0, 60).map((r) => String(r[i] ?? "").length)) + 2)) }));
+    ws["!autofilter"] = { ref: X.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: rows.length - 1, c: rows[0].length - 1 } }) };
+    ws["!freeze"] = { xSplit: 0, ySplit: 1 };
+    const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, s.label);
+    download(name + ".xlsx", new Blob([X.write(wb, { bookType: "xlsx", type: "array" })], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+  } catch (e) {
+    // Fallback: a CSV that Excel opens too.
+    const csv = rows.map((r) => r.map((v) => (/[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v)).join(",")).join("\r\n");
+    download(name + ".csv", new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }));
+  }
 }
 function render() {
   const s = D.sports[S.sp];
@@ -80,6 +138,7 @@ function render() {
   <div class="bar"><button class="nav" data-step="-1" ${gi === 0 ? "disabled" : ""} aria-label="Previous">‹</button>
     <select id="grp">${s.groups.map((x) => `<option value="${esc(x.g)}" ${x.g === G.g ? "selected" : ""}>${esc(glabel(s, x.g))}${x.g === today(s) ? (s.group_kind === "week" ? " (this week)" : " (today)") : ""}</option>`).join("")}</select>
     <button class="nav" data-step="1" ${gi === keys.length - 1 ? "disabled" : ""} aria-label="Next">›</button>
+    <button class="nav" id="xls" title="Every ${s.group_kind === "week" ? "week" : "day"} of the season in one Excel file">Excel ↓</button>
     <span class="note">${s.label} ${esc(s.season)} · ${three && s.reg_known ? `60-minute favourite right ${s.reg_fav_won} of ${s.reg_known} (${s.reg_draws} went to overtime)` : `favourite won ${s.fav_won} of ${s.played}`}${done.length && !three ? ` · this ${s.group_kind === "week" ? "week" : "day"}: ${favOk} of ${done.length}` : ""}</span></div>
   ${ruleCard(s)}
   <div class="panel"><div class="tw"><table><thead><tr><th class="l">Game (away @ home)</th><th>Expected</th><th>Total</th>${three ? "<th>60 min<br>away · draw · home</th><th>Odds<br>away</th><th>Odds<br>draw</th><th>Odds<br>home</th><th>Ours incl. OT<br>away · home</th>" : "<th>Win %<br>away · home</th><th>Odds<br>away</th><th>Odds<br>home</th>"}${nfl ? "<th>Market</th>" : ""}${EDGE_TH}<th>Result</th></tr></thead><tbody>
@@ -100,10 +159,11 @@ function render() {
   </tbody></table></div></div>
   <p class="note" style="margin-top:12px">${esc(NOTES[s.key] || "")} The model knows nothing about injuries, rest or lineups.</p>
   <p class="note">Every column reads away first, then home, in the same order as "away @ home" and the result. Book: the bookmaker's away and home moneyline as decimal odds, ${nfl ? "from nflverse (the closing line once a game is played)" : "DraftKings via ESPN: the closing price for games played in the last week and since, the latest price for games to come (prices appear on the day of the game)"}${three ? ", overtime and shootout included, so it is compared with our odds incl. OT" : ""}. Book win %: the chances in those prices with the bookmaker's margin taken out (1 ÷ odds, scaled to add up to 100%). Gap: our win chance minus the bookmaker's, in percentage points, for the away and the home side; green from +5 points.</p>
-  <p class="note">SKIP: the bookmaker rates our favourite at least 10 points lower than we do (margin taken out). Usually a missing or rested player we cannot see. Over the last two seasons our favourite then won only 38–43% of the time, and betting either side did not pay reliably, so leave these games alone.</p>
+  ${nfl ? "" : `<p class="note">SKIP: the bookmaker rates our favourite at least 10 points lower than we do (margin taken out). Usually a missing or rested player we cannot see. Over the last two seasons our favourite then won only 38–43% of the time, and betting either side did not pay reliably, so leave these games alone.</p>`}
   ${D.errors && D.errors.length ? `<p class="note">Update problems: ${D.errors.map(esc).join(" · ")}</p>` : ""}`;
 }
 app.addEventListener("click", (e) => {
+  if (e.target.closest("#xls")) { exportExcel(); return; }
   const t = e.target.closest("[data-sp]"); if (t) { S.sp = +t.dataset.sp; save(); render(); return; }
   const n = e.target.closest("[data-step]"); if (n) { const s = D.sports[S.sp], k = s.groups.map((x) => x.g), i = k.indexOf(S.g[s.key]) + +n.dataset.step; if (i >= 0 && i < k.length) { S.g[s.key] = k[i]; render(); } }
 });
