@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from sports import data, market, model
+from sports import data, epa, market, model
 
 
 def _num(v, d=2):
@@ -27,6 +27,9 @@ def rule_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
     return None
 
 
+ROOT_DIR = Path(__file__).resolve().parents[1]
+
+
 def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: dict | None = None, notes: list | None = None) -> dict:
     sc = cfg["sports"][key]
     cur, prev = data.nfl(sc, ua, today) if key == "nfl" else data.daily(key, sc, ua, today, min_home)
@@ -39,6 +42,14 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
         cur.loc[extra & (cur.hs > cur.as_), "hs"] -= 1
         cur.loc[extra & (cur.as_ > cur.hs), "as_"] -= 1
     P, home = model.predict_season(cur, prev, sc)
+    if sc.get("epa"):
+        # NFL: win chances and the expected margin from opponent-adjusted EPA per play.
+        try:
+            P = epa.apply(P, ROOT_DIR, ua)
+            home = json.loads((ROOT_DIR / "config" / "nfl_epa.json").read_text(encoding="utf-8"))["hfa"]
+        except Exception as exc:  # noqa: BLE001 - the points model still stands
+            if notes is not None:
+                notes.append(f"{sc['label']} EPA model not used this time ({exc}); showing the points model")
     draw_rate = None
     if sc.get("three_way"):
         # Independent Poisson goals give too few regulation draws. Scale the draw chance so the
