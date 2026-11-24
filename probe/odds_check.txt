@@ -1,0 +1,23 @@
+season   provider              prio
+2025-26  Draft Kings           1       104
+         ESPN BET              0        49
+         ESPN Bet - Live Odds  0        47
+2026-27  Draft Kings           1        78
+dtype: int64
+         games  has_close  has_open                             providers
+season                                                                   
+2025-26    153        1.0       1.0  {'Draft Kings': 104, 'ESPN BET': 49}
+2026-27     78        1.0       1.0                   {'Draft Kings': 78}
+      season       day home away     provider  ml_h open_h close_h  ml_a open_a close_a
+0    2025-26  20251019  WSH  VAN     ESPN BET  -155   -150    -155   135   +130    +135
+2    2025-26  20251019  DET  EDM     ESPN BET   110   +115    +110  -130   -135    -130
+4    2025-26  20251019  CHI  ANA     ESPN BET   100   +120    +100  -120   -140    -120
+6    2025-26  20251019  UTA  BOS     ESPN BET  -215   -250    -215   180   +210    +180
+8    2025-26  20251028  PHI  PIT     ESPN BET  -175   -145    -175   150   +125    +150
+10   2025-26  20251028  TOR  CGY     ESPN BET  -185   -215    -175   155   +180    +150
+200  2026-27  20261002  DET  NYR  Draft Kings  -125   -142    -125   105   +120    +105
+201  2026-27  20261002  CAR  WSH  Draft Kings  -148   -142    -148   124   +120    +124
+202  2026-27  20261002  WPG  BOS  Draft Kings  -122   -120    -122   102   +100    +102
+203  2026-27  20261002  DAL  STL  Draft Kings  -185   -205    -185   154   +170    +154
+204  2026-27  20261002  VGK  ANA  Draft Kings  -218   -155    -218   180   +130    +180
+205  2026-27  20261007  WSH  PIT  Draft Kings  -155   -162    -155   130   +136    +130
