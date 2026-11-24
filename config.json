@@ -59,6 +59,10 @@
         "SJ": "SJS",
         "TB": "TBL",
         "LA": "LAK"
+      },
+      "xg": {
+        "prior_share": 0.5,
+        "prior_weight": 3
       }
     }
   },
