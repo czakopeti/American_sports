@@ -60,16 +60,28 @@
         "TB": "TBL",
         "LA": "LAK"
       },
-      "rule": {
-        "name": "N",
-        "side": "a",
-        "min_ours": 0.52,
-        "min_gap": -1.0,
-        "max_gap": 0.02,
-        "tracking_from": "2026-11-24",
-        "text": "Bet the away team when our chance for it (overtime included) is above 52% and the bookmaker's chance (margin taken out) is less than 2 points above ours, or below ours.",
-      "found": "Picked from the November games on this page. Whole season with closing prices: October 53 bets, 27 won, -12%; 1-23 November 37 bets, 27 won, +29%; together 90 bets, +4.2 units (+4.6%), average price 1.78. Last season it lost (211 bets, -2.7%). On the page for testing only."
-      },
+      "rules": [
+        {
+          "name": "R1",
+          "bet": "h",
+          "market": "reg",
+          "min_ours": 50,
+          "gap_below": -6,
+          "tracking_from": "2026-11-24",
+          "text": "Bet the home team to win in regulation (60 minutes) when our chance for it, overtime included, is above 50% and the gap (ours minus the bookmaker's, margin taken out) is below -6 points, as the table shows them.",
+          "found": "Picked from this season's games: to 23 November 30 bets, 23 won in regulation. Settled at our own 60-minute odds, as there are no bookmaker three-way prices here; a bookmaker usually pays a few percent less. The same games on the moneyline lost last season (about -14%). On the page for testing only."
+        },
+        {
+          "name": "R2",
+          "bet": "a",
+          "market": "reg",
+          "min_ours": 50,
+          "gap_above": 2,
+          "tracking_from": "2026-11-24",
+          "text": "Bet the away team to win in regulation (60 minutes) when our chance for it, overtime included, is above 50% and the gap (ours minus the bookmaker's, margin taken out) is above +2 points, as the table shows them.",
+          "found": "Settled at our own 60-minute odds, as there are no bookmaker three-way prices here; a bookmaker usually pays a few percent less. On the moneyline these games lost this season (about -6%) and won a little last season (about +2%). On the page for testing only."
+        }
+      ],
       "xg": {
         "prior_share": 0.5,
         "prior_weight": 3
