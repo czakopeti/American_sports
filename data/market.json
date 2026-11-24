@@ -1191,22 +1191,22 @@
 "close": true
 },
 "2026-11-25|BOS|WSH": {
-"at": "2026-11-24T05:40:22Z",
+"at": "2026-11-24T05:55:47Z",
 "ba": 1.221,
 "bh": 4.51,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-25|DAL|DEN": {
-"at": "2026-11-24T05:40:22Z",
+"at": "2026-11-24T05:55:47Z",
 "ba": 3.6,
 "bh": 1.311,
-"book": "Draft Kings"
+"book": "DraftKings"
 },
 "2026-11-25|DET|ORL": {
-"at": "2026-11-24T05:40:22Z",
+"at": "2026-11-24T05:55:47Z",
 "ba": 1.769,
 "bh": 2.1,
-"book": "Draft Kings"
+"book": "DraftKings"
 }
 },
 "nhl": {
@@ -2317,10 +2317,10 @@
 "close": true
 },
 "2026-11-25|VGK|EDM": {
-"at": "2026-11-24T05:40:26Z",
+"at": "2026-11-24T05:55:58Z",
 "ba": 1.847,
 "bh": 1.98,
-"book": "Draft Kings"
+"book": "DraftKings"
 }
 }
 }
