@@ -77,5 +77,5 @@
     }
   },
   "min_home_games_for_team": 10,
-  "closing_price_days": 7
+  "closing_price_days": 60
 }
