@@ -16,10 +16,15 @@ def _num(v, d=2):
 
 
 def rule_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
-    """Our favourite, when the bookmaker (margin taken out) rates it between min_gap and max_gap above us."""
+    """Our favourite, when the bookmaker (margin taken out) rates it between min_gap and max_gap above us.
+
+    With "side": "a" (or "h") only when our favourite is the away (or home) team.
+    """
     ih, ia = 1 / bh, 1 / ba
     qh = ih / (ih + ia)
     home = pm >= 0.5
+    if rule.get("side") and rule["side"] != ("h" if home else "a"):
+        return None
     ours, theirs = (pm, qh) if home else (1 - pm, 1 - qh)
     gap = theirs - ours
     if rule["min_gap"] <= gap < rule["max_gap"]:
