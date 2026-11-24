@@ -136,6 +136,8 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
             for rule, record in zip(rules, records):
                 if not (item.get("bh") and item.get("ba")):
                     break
+                if rule.get("min_week") and int(grp) < rule["min_week"]:
+                    continue  # NFL week 1: our numbers are still only last season's
                 pick = (side_pick if "bet" in rule else rule_pick)(pm, item["bh"], item["ba"], rule)
                 if not pick:
                     continue
