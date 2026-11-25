@@ -117,5 +117,16 @@
     }
   },
   "min_home_games_for_team": 10,
-  "closing_price_days": 7
+  "closing_price_days": 7,
+  "tennis": {
+    "label": "Tennis",
+    "rule": {
+      "name": "T",
+      "max_odds": 3.25,
+      "tracking_from": "2026-11-25",
+      "text": "Back the worse-ranked player when the bookmaker's odds are at or above our tennis dashboard's fair odds and at most 3.25. Men and women alike. Picks and results come from the tennis dashboard (czakopeti/tennis), which updates at about 6:45, 8:45, 10:45 and 18:45 Budapest time.",
+      "found": "On the dashboard's history from 19 August to 9 November: 241 bets, 116 won, +35.2 units (+14.6%), average odds 2.40; from 1 October 123 bets, +6.3 units (+5.1%).",
+      "backtest": "241 bets, 116 won, +35.2 units (+14.6%), dashboard history 19 Aug – 9 Nov"
+    }
+  }
 }
