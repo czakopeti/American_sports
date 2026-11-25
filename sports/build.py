@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import math
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -68,7 +68,8 @@ def rule_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
 
-def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: dict | None = None, notes: list | None = None) -> dict:
+def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: dict | None = None, notes: list | None = None,
+               log: dict | None = None) -> dict:
     sc = cfg["sports"][key]
     cur, prev = data.nfl(sc, ua, today) if key == "nfl" else data.daily(key, sc, ua, today, min_home)
     if sc.get("three_way"):
@@ -121,6 +122,12 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
     book = store.get(key, {})
     rules = sc.get("rules") or ([sc["rule"]] if sc.get("rule") else [])
     records: list[list] = [[] for _ in rules]
+    # The bet log: every pick the page showed before kick-off, kept even if it later goes away,
+    # at the price it had when it first appeared. This is the live record.
+    blog = (log if log is not None else {}).setdefault(key, {})
+    now = datetime.now(timezone.utc)
+    stamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    finals: dict[str, tuple] = {}
     groups = []
     for grp, g in P.groupby("group", sort=True):
         games = []
@@ -142,12 +149,32 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
             if sc.get("three_way"):
                 pm = r.p1 + sc.get("overtime_home_share", 0.5) * r.px
             item["pm"] = _num(pm, 4)
+            gkey = market.key({"t": r.kickoff, "a": r.away, "h": r.home})
+            ko = datetime.fromisoformat(r.kickoff.replace("Z", "+00:00"))
+            upcoming = not r.done and now < ko <= now + timedelta(days=7)  # the log keeps the coming week only
+            if r.done:
+                pt_ = getattr(r, "pt", None)
+                finals[gkey] = (int(getattr(r, "fhs", r.hs)), int(getattr(r, "fas", r.as_)), pt_ if isinstance(pt_, str) else None)
             for rule, record in zip(rules, records):
                 if not (item.get("bh") and item.get("ba")):
                     break
                 if rule.get("min_week") and int(grp) < rule["min_week"]:
                     continue  # NFL week 1: our numbers are still only last season's
                 pick = (side_pick if "bet" in rule else rule_pick)(pm, item["bh"], item["ba"], rule)
+                lk = f"{gkey}|{rule['name']}"
+                if upcoming and pick:
+                    price_now = (reg_book_price(item["bh"], item["ba"], r.px, pick, sc.get("reg_margin", 0.078))
+                                 if rule.get("market") == "reg" else (item["bh"] if pick == "h" else item["ba"]))
+                    e = blog.get(lk)
+                    if e is None or e["side"] != pick:
+                        blog[lk] = {"t": r.kickoff, "a": r.away, "h": r.home, "rule": rule["name"], "side": pick,
+                                    "market": rule.get("market", "ml"), "first_at": stamp, "price": price_now,
+                                    "last_at": stamp, "last_price": price_now, "on": True}
+                    else:
+                        e.update(last_at=stamp, last_price=price_now, on=True)
+                        e.pop("off_at", None)
+                elif upcoming and lk in blog and blog[lk].get("on"):
+                    blog[lk].update(on=False, off_at=stamp)  # shown earlier, gone now: still counts if you bet it
                 if not pick:
                     continue
                 item.setdefault("picks", []).append([rule["name"], pick])
@@ -194,7 +221,26 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
         extra = {"reg_known": int(len(known)), "reg_fav_won": int((pick == reg.astype(int).to_numpy()).sum()),
                  "reg_draws": int(known.pt.isin(["OT", "SO"]).sum())}
     if rules:
-        extra["rules"] = [dict(rule) | {"record": record} for rule, record in zip(rules, records)]
+        live: dict[str, list] = {r_["name"]: [] for r_ in rules}
+        for e in sorted(blog.values(), key=lambda x: x["t"]):
+            if e["rule"] not in live:
+                continue
+            x = dict(e)
+            fin = finals.get(market.key(e))
+            if fin:
+                hs, as_, pt = fin
+                if e["market"] == "reg":
+                    if pt is None:
+                        live[e["rule"]].append(x)
+                        continue
+                    won = pt not in ("OT", "SO") and ((hs > as_) if e["side"] == "h" else (as_ > hs))
+                else:
+                    won = (hs > as_) if e["side"] == "h" else (as_ > hs)
+                x.update(hs=hs, as_=as_, won=bool(won), profit=round(e["price"] - 1 if won else -1, 3))
+                if pt and pt != "REG":
+                    x["pt"] = pt
+            live[e["rule"]].append(x)
+        extra["rules"] = [dict(rule) | {"record": record, "live": live[rule["name"]]} for rule, record in zip(rules, records)]
     if "reg_margin" in sc:
         extra["reg_margin"] = sc["reg_margin"]
     season = int(cur.season.iloc[0])
@@ -209,12 +255,15 @@ def build(root: Path, cfg: dict, today: date) -> dict:
     out = {"updated": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"), "sports": [], "errors": []}
     store_path = root / "data" / "market.json"
     store = market.load(store_path)
+    log_path = root / "data" / "bet_log.json"
+    log = json.loads(log_path.read_text(encoding="utf-8")) if log_path.exists() else {}
     for key in cfg["sports"]:
         try:
-            out["sports"].append(sport_json(key, cfg, cfg["user_agent"], today, cfg["min_home_games_for_team"], store, out["errors"]))
+            out["sports"].append(sport_json(key, cfg, cfg["user_agent"], today, cfg["min_home_games_for_team"], store, out["errors"], log))
         except Exception as exc:  # noqa: BLE001 - one league failing must not hide the others
             out["errors"].append(f"{cfg['sports'][key]['label']}: {exc}")
     market.save(store_path, store)
+    log_path.write_text(json.dumps(log, ensure_ascii=False, indent=0, sort_keys=True), encoding="utf-8")
     return out
 
 
