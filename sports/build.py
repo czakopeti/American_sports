@@ -15,6 +15,15 @@ def _num(v, d=2):
     return None if v is None or (isinstance(v, float) and math.isnan(v)) else round(float(v), d)
 
 
+def reg_book_price(bh: float, ba: float, px: float, side: str, margin: float) -> float:
+    """The bookmaker's 60-minute (1X2) price for one side, estimated from its moneyline: the side's
+    chance with the margin taken out, less half our chance of a draw after 60 minutes (overtime is
+    about a coin toss), then the bookmaker's three-way margin on top (7.8% matched real prices)."""
+    ih, ia = 1 / bh, 1 / ba
+    q = (ih if side == "h" else ia) / (ih + ia)
+    return round(1 / ((q - 0.5 * px) * (1 + margin)), 3)
+
+
 def side_pick(pm: float, bh: float, ba: float, rule: dict) -> str | None:
     """A rule on one named side ("bet": "h" or "a"), read off the numbers as the table shows them
     (one decimal): our chance incl. overtime above "min_ours" (%), and the gap (ours minus the
@@ -148,11 +157,11 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
                 hs, as_ = int(getattr(r, "fhs", r.hs)), int(getattr(r, "fas", r.as_))
                 pt = getattr(r, "pt", None)
                 if rule.get("market") == "reg":
-                    # The 60-minute result, paid at our own 60-minute odds (no bookmaker three-way prices here).
+                    # The 60-minute result, at the bookmaker's estimated 60-minute price (no three-way prices here).
                     if not isinstance(pt, str):
                         continue
                     won = pt not in ("OT", "SO") and ((hs > as_) if pick == "h" else (as_ > hs))
-                    price = round(1 / (r.p1 if pick == "h" else r.p2), 3)
+                    price = reg_book_price(item["bh"], item["ba"], r.px, pick, sc.get("reg_margin", 0.078))
                 else:
                     won = (hs > as_) if pick == "h" else (as_ > hs)
                     price = item["bh"] if pick == "h" else item["ba"]
@@ -186,6 +195,8 @@ def sport_json(key: str, cfg: dict, ua: str, today: date, min_home: int, store: 
                  "reg_draws": int(known.pt.isin(["OT", "SO"]).sum())}
     if rules:
         extra["rules"] = [dict(rule) | {"record": record} for rule, record in zip(rules, records)]
+    if "reg_margin" in sc:
+        extra["reg_margin"] = sc["reg_margin"]
     season = int(cur.season.iloc[0])
     label = f"{season}" if key == "nfl" else f"{season - 1}–{str(season)[-2:]}"
     return {"key": key, "label": sc["label"], "season": label, "unit": sc["unit"], "group_kind": sc["group"],

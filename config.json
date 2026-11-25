@@ -96,7 +96,7 @@
           "gap_below": -6,
           "tracking_from": "2026-11-25",
           "text": "Bet the home team to win in regulation (60 minutes) when our chance for it, overtime included, is above 50% and the gap (ours minus the bookmaker's, margin taken out) is below -6 points, as the table shows them.",
-          "found": "Picked from this season's games: to 23 November 30 bets, 23 won in regulation. Settled at our own 60-minute odds, as there are no bookmaker three-way prices here; a bookmaker usually pays a few percent less. The same games on the moneyline lost last season (about -14%). On the page for testing only."
+          "found": "Picked from this season's games: to 23 November 30 bets, 23 won in regulation. Settled at the bookmaker's estimated 60-minute price (from the moneyline, see below): about +29% this season, against +65% at our own odds. The same games on the moneyline lost last season (about -14%). On the page for testing only."
         },
         {
           "name": "R2",
@@ -106,13 +106,14 @@
           "gap_below": 2,
           "tracking_from": "2026-11-25",
           "text": "Bet the away team to win in regulation (60 minutes) when our chance for it, overtime included, is above 50% and the gap (ours minus the bookmaker's, margin taken out) is below +2 points, as the table shows them.",
-          "found": "Picked from this season's games: to 23 November 89 bets, 53 won in regulation. Settled at our own 60-minute odds, as there are no bookmaker three-way prices here; a bookmaker usually pays a few percent less. The same games on the moneyline won this season (about +7%) and lost last season (about -6%). On the page for testing only."
+          "found": "Picked from this season's games: to 23 November 89 bets, 53 won in regulation. Settled at the bookmaker's estimated 60-minute price (from the moneyline, see below): about +21% this season, against +37% at our own odds. On the moneyline these games won this season (about +7%) and lost last season (about -6%). On the page for testing only."
         }
       ],
       "xg": {
         "prior_share": 0.5,
         "prior_weight": 3
-      }
+      },
+      "reg_margin": 0.078
     }
   },
   "min_home_games_for_team": 10,

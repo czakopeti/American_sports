@@ -62,7 +62,7 @@ function oneRule(s, r) {
   const live = r.record.filter((x) => x.t.slice(0, 10) >= r.tracking_from);
   const recent = [...live].reverse().slice(0, 12);
   return `<div class="panel" style="padding:12px 14px;margin:10px 0"><b>Rule ${esc(r.name)}${reg ? " · 60 minutes" : ""}</b>
-    <p class="note" style="margin-top:6px">${esc(r.text)} ${reg ? "Settled on the 60-minute result at our own 60-minute odds." : "Paid at the bookmaker's price; the record uses the closing price."}</p>
+    <p class="note" style="margin-top:6px">${esc(r.text)} ${reg ? "Settled on the 60-minute result at the bookmaker's estimated 60-minute price: the moneyline chance with the margin taken out, less half our chance of a draw after 60 minutes, with a 7.8% three-way margin on top (this matched real 1X2 prices)." : "Paid at the bookmaker's price; the record uses the closing price."}</p>
     <p class="note" style="margin-top:6px">${esc(r.found)}</p>
     <p class="note" style="margin-top:6px">From ${esc(dfmt(r.tracking_from))}, the real test: ${tally(live)}.</p>
     <p class="note" style="margin-top:4px">This season so far: ${tally(r.record)}.</p>
@@ -133,6 +133,8 @@ const HEAD = () => `<span class="kicker">Updated ${esc(new Date(D.updated).toLoc
 const LC = { nfl: "#2fb36b", nba: "#f07a2a", nhl: "#4f8df5" }; // one colour per league on the Bets page
 const lg = (s) => `<span style="display:inline-block;padding:1px 8px;border-radius:999px;background:${LC[s.key] || "var(--muted)"};color:#fff;font-weight:700;font-size:12px">${esc(s.label)}</span>`;
 const lbar = (s) => `box-shadow:inset 4px 0 0 ${LC[s.key] || "transparent"}`;
+// The bookmaker's 60-minute price estimated from its moneyline (same formula as the build).
+const estReg = (m, side, mg) => { const ih = 1 / m.bh, ia = 1 / m.ba, q = (side === "h" ? ih : ia) / (ih + ia); return 1 / ((q - 0.5 * m.px) * (1 + mg)); };
 const dayKey = (t) => new Date(t).toLocaleDateString("en-CA");
 const dayLabel = (k) => new Date(k + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 const hm = (t) => new Date(t).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
@@ -148,7 +150,8 @@ function betsPage() {
         const team = side === "a" ? m.a : m.h, opp = side === "a" ? m.h : m.a;
         const book = side === "a" ? m.ba : m.bh;
         const ours = reg ? (side === "a" ? m.p2 : m.p1) : (side === "a" ? 1 - m.pm : m.pm);
-        open.push({ s, si, m, name, side, reg, team, opp, book, ours, started: new Date(m.t).getTime() <= now });
+        const est = reg && m.bh && m.ba ? estReg(m, side, s.reg_margin ?? 0.078) : null;
+        open.push({ s, si, m, name, side, reg, team, opp, book, ours, est, started: new Date(m.t).getTime() <= now });
       });
     }));
     rulesOf(s).forEach((r) => r.record.forEach((x) => done.push({ s, r, x })));
@@ -161,7 +164,7 @@ function betsPage() {
     <td class="l">${lg(o.s)}</td><td><span style="display:inline-block;padding:0 6px;border-radius:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:11px">${esc(o.name)}</span></td>
     <td class="l"><b>${esc(o.team)}</b> <span class="sub" style="display:inline">${o.side === "a" ? "away at " + esc(o.opp) : "home v " + esc(o.opp)}</span></td>
     <td class="l">${o.reg ? "60 minutes (1X2)" : "Moneyline"}</td>
-    <td class="mono">${o.reg ? `<span class="sub" style="display:inline">ours</span> ${odd(o.ours)}` : (o.book ? o.book.toFixed(2) : "–")}</td>
+    <td class="mono">${o.reg ? `${o.est ? o.est.toFixed(2) : "–"}<span class="sub">ours ${odd(o.ours)}</span>` : (o.book ? o.book.toFixed(2) : "–")}</td>
     <td class="mono">${pc(o.ours)}</td></tr>`;
   const tallyRule = (s, r) => { const live = r.record.filter((x) => x.t.slice(0, 10) >= r.tracking_from); return `<tr><td class="l" style="${lbar(s)};padding-left:12px">${lg(s)}</td><td><span style="display:inline-block;padding:0 6px;border-radius:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:11px">${esc(r.name)}</span></td><td class="l">${r.market === "reg" ? "60 minutes" : "Moneyline"}</td><td class="l note">${tally(live)}</td><td class="l note">${tally(r.record)}</td></tr>`; };
   app.innerHTML = `${HEAD()}<h1>Bets</h1>
@@ -169,13 +172,13 @@ function betsPage() {
   ${TABS()}
   ${days.length ? days.map((k) => `<div class="panel"><b>${esc(dayLabel(k))}</b><div class="tw"><table><thead><tr><th class="l">Time</th><th class="l">League</th><th>Rule</th><th class="l">Bet on</th><th class="l">Market</th><th>Price</th><th>Our chance</th></tr></thead><tbody>
     ${open.filter((o) => dayKey(o.m.t) === k).map(row).join("")}</tbody></table></div></div>`).join("") : `<div class="panel"><p class="note" style="margin:10px 0">No bets right now. NBA and NHL prices usually come in during the day; check again in the evening.</p></div>`}
-  <p class="note">Price: the bookmaker's moneyline (DraftKings, or the NFL market line), the latest we have seen; take the bet if your bookmaker pays about the same or more. For 60-minute bets we have no bookmaker three-way price, so the price shown is our own fair odds: worth it if your bookmaker pays at least that.</p>
+  <p class="note">Price: the bookmaker's moneyline (DraftKings, or the NFL market line), the latest we have seen; take the bet if your bookmaker pays about the same or more. For 60-minute bets we have no bookmaker three-way price: the first number is the bookmaker's price estimated from its moneyline (about what you will be offered), the second our own fair odds (the model sees value if your bookmaker pays at least that).</p>
   <div class="panel"><b>Last three days</b><div class="tw"><table><thead><tr><th class="l">Game</th><th class="l">League</th><th>Rule</th><th class="l">Bet on</th><th>Price</th><th>Result</th><th>Profit</th></tr></thead><tbody>
     ${recent.length ? recent.map((d) => `<tr><td class="l" style="${lbar(d.s)};padding-left:12px"><span class="sub">${esc(new Date(d.x.t).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }))}</span>${esc(d.x.a)} @ ${esc(d.x.h)}</td><td class="l">${lg(d.s)}</td><td><span style="display:inline-block;padding:0 6px;border-radius:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:11px">${esc(d.r.name)}</span></td><td class="l">${esc(d.x.side === "a" ? d.x.a : d.x.h)}${d.r.market === "reg" ? ' <span class="sub" style="display:inline">60 min</span>' : ""}</td><td class="mono">${d.x.price.toFixed(2)}</td><td class="mono">${d.x.as_}–${d.x.hs}${d.x.pt ? ` <span class="sub" style="display:inline">${esc(d.x.pt)}</span>` : ""}</td><td class="mono"><span class="${d.x.won ? "ok" : "no"}">${sgn(d.x.profit)}</span></td></tr>`).join("") : `<tr><td class="l note" colspan="7">No settled bets in the last three days.</td></tr>`}
   </tbody></table></div></div>
   <div class="panel"><b>Rules</b><div class="tw"><table><thead><tr><th class="l">League</th><th>Rule</th><th class="l">Market</th><th class="l">Live (since it went up)</th><th class="l">This season</th></tr></thead><tbody>
     ${D.sports.map((s) => rulesOf(s).map((r) => tallyRule(s, r)).join("")).join("")}</tbody></table></div>
-    <p class="note">The full wording of each rule is on its league's tab. Records use closing prices (moneyline) or our own 60-minute odds.</p></div>
+    <p class="note">The full wording of each rule is on its league's tab. Records use closing prices: the moneyline, or for 60-minute bets the 1X2 price estimated from it.</p></div>
   ${D.errors && D.errors.length ? `<p class="note">Update problems: ${D.errors.map(esc).join(" · ")}</p>` : ""}`;
 }
 function render() {
