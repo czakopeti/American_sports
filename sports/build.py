@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from sports import data, epa, market, model, nhl_xg
+from sports import data, epa, market, model, nhl_xg, tennis
 
 
 def _num(v, d=2):
@@ -262,6 +262,11 @@ def build(root: Path, cfg: dict, today: date) -> dict:
             out["sports"].append(sport_json(key, cfg, cfg["user_agent"], today, cfg["min_home_games_for_team"], store, out["errors"], log))
         except Exception as exc:  # noqa: BLE001 - one league failing must not hide the others
             out["errors"].append(f"{cfg['sports'][key]['label']}: {exc}")
+    if cfg.get("tennis"):
+        try:
+            out["tennis"] = tennis.build(cfg["tennis"], cfg["user_agent"], log, datetime.now(timezone.utc))
+        except Exception as exc:  # noqa: BLE001 - the American leagues still stand
+            out["errors"].append(f"Tennis: {exc}")
     market.save(store_path, store)
     log_path.write_text(json.dumps(log, ensure_ascii=False, indent=0, sort_keys=True), encoding="utf-8")
     return out
