@@ -15,7 +15,7 @@ from zoneinfo import ZoneInfo
 
 from sports.data import _get
 
-RAW = "https://raw.githubusercontent.com/czakopeti/tennis/main/data/{path}"
+RAW = "https://raw.githubusercontent.com/czakopeti/tennis/main/{path}"
 BUD = ZoneInfo("Europe/Budapest")
 
 
