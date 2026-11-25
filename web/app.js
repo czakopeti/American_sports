@@ -57,16 +57,20 @@ const skipGap = (m) => {
 // Not on the NFL page: since the EPA model, the gap there has its own reading.
 const skipTag = (m) => { if (["nfl", "nhl", "nba"].includes(D.sports[S.sp].key)) return ""; const g = skipGap(m); return g != null && g <= -0.10 ? ` <span style="display:inline-block;padding:0 6px;border-radius:5px;border:1px solid var(--bad);color:var(--bad);font-weight:800;font-size:11px">SKIP</span>` : ""; };
 function ruleCard(s) { return rulesOf(s).map((r) => oneRule(s, r)).join(""); }
+// The live record is the bet log: every pick shown before kick-off, at the price when it first appeared,
+// kept even if the signal later went away. The season line is the backtest on closing prices.
+const settled = (r) => (r.live || []).filter((x) => x.won != null && x.t.slice(0, 10) >= r.tracking_from);
+const logRow = (x) => `<tr><td class="l"><span class="sub">${esc(dfmt(x.t.slice(0, 10)))}${x.on === false ? " · signal went away later" : ""}</span>${esc(x.side === "a" ? x.a : x.h)} <span class="sub" style="display:inline">${x.side === "a" ? "away at " + esc(x.h) : "home v " + esc(x.a)}</span></td><td class="mono">${x.price.toFixed(2)}</td><td class="mono">${x.won == null ? "–" : `${x.as_}–${x.hs}${x.pt ? ` <span class="sub" style="display:inline">${esc(x.pt)}</span>` : ""}`}</td><td class="mono">${x.won == null ? '<span class="sub" style="display:inline">open</span>' : `<span class="${x.won ? "ok" : "no"}">${sgn(x.profit)}</span>`}</td></tr>`;
 function oneRule(s, r) {
   const reg = r.market === "reg";
-  const live = r.record.filter((x) => x.t.slice(0, 10) >= r.tracking_from);
-  const recent = [...live].reverse().slice(0, 12);
+  const live = settled(r);
+  const recent = [...(r.live || [])].filter((x) => x.t.slice(0, 10) >= r.tracking_from).reverse().slice(0, 12);
   return `<div class="panel" style="padding:12px 14px;margin:10px 0"><b>Rule ${esc(r.name)}${reg ? " · 60 minutes" : ""}</b>
-    <p class="note" style="margin-top:6px">${esc(r.text)} ${reg ? "Settled on the 60-minute result at the bookmaker's estimated 60-minute price: the moneyline chance with the margin taken out, less half our chance of a draw after 60 minutes, with a 7.8% three-way margin on top (this matched real 1X2 prices)." : "Paid at the bookmaker's price; the record uses the closing price."}</p>
+    <p class="note" style="margin-top:6px">${esc(r.text)} ${reg ? "Priced at the bookmaker's estimated 60-minute price: the moneyline chance with the margin taken out, less half our chance of a draw after 60 minutes, with a 7.8% three-way margin on top (this matched real 1X2 prices)." : "Priced at the bookmaker's moneyline."}</p>
     <p class="note" style="margin-top:6px">${esc(r.found)}</p>
-    <p class="note" style="margin-top:6px">From ${esc(dfmt(r.tracking_from))}, the real test: ${tally(live)}.</p>
-    <p class="note" style="margin-top:4px">This season so far: ${tally(r.record)}.</p>
-    ${recent.length ? `<div class="tw"><table><thead><tr><th class="l">Pick</th><th>Price</th><th>Result</th><th>Profit</th></tr></thead><tbody>${recent.map((x) => `<tr><td class="l"><span class="sub">${esc(dfmt(x.t.slice(0, 10)))}</span>${esc(x.side === "a" ? x.a : x.h)} <span class="sub" style="display:inline">${x.side === "a" ? "away at " + esc(x.h) : "home v " + esc(x.a)}</span></td><td class="mono">${x.price.toFixed(2)}</td><td class="mono">${x.as_}–${x.hs}${x.pt ? ` <span class="sub" style="display:inline">${esc(x.pt)}</span>` : ""}</td><td class="mono"><span class="${x.won ? "ok" : "no"}">${sgn(x.profit)}</span></td></tr>`).join("")}</tbody></table></div>` : ""}
+    <p class="note" style="margin-top:6px"><b>Bet log</b> from ${esc(dfmt(r.tracking_from))}: ${tally(live)}. Every pick this page showed before kick-off, at the price when it first appeared; a pick stays in even if the signal goes away later, and one that only appears after kick-off is never counted.</p>
+    <p class="note" style="margin-top:4px">Backtest this season on closing prices: ${tally(r.record)}. Closing prices include late moves you could not have seen, so this flatters or hurts the rule.</p>
+    ${recent.length ? `<div class="tw"><table><thead><tr><th class="l">Pick</th><th>Price</th><th>Result</th><th>Profit</th></tr></thead><tbody>${recent.map(logRow).join("")}</tbody></table></div>` : ""}
     <p class="note" style="margin-top:6px">The ${esc(r.name)} badge in the table marks the side to bet, using the latest price we have seen.</p></div>`;
 }
 // Excel export: every week (or day) of the season for the open league, away first like the table.
@@ -144,7 +148,7 @@ function betsPage() {
   D.sports.forEach((s, si) => {
     const rules = Object.fromEntries(rulesOf(s).map((r) => [r.name, r]));
     s.groups.forEach((g) => g.games.forEach((m) => {
-      if (m.hs != null) return;
+      if (m.hs != null || new Date(m.t).getTime() > now + 7 * 86400e3) return; // the coming week only
       picksOf(m).forEach(([name, side]) => {
         const r = rules[name] || {}, reg = r.market === "reg";
         const team = side === "a" ? m.a : m.h, opp = side === "a" ? m.h : m.a;
@@ -154,7 +158,13 @@ function betsPage() {
         open.push({ s, si, m, name, side, reg, team, opp, book, ours, est, started: new Date(m.t).getTime() <= now });
       });
     }));
-    rulesOf(s).forEach((r) => r.record.forEach((x) => done.push({ s, r, x })));
+    rulesOf(s).forEach((r) => (r.live || []).forEach((x) => {
+      if (x.won != null) done.push({ s, r, x });
+      else if (x.on === false && new Date(x.t).getTime() > now) {
+        const reg = r.market === "reg";
+        open.push({ s, si, m: { t: x.t, a: x.a, h: x.h }, name: r.name, side: x.side, reg, team: x.side === "a" ? x.a : x.h, opp: x.side === "a" ? x.h : x.a, book: x.price, est: reg ? x.price : null, ours: null, gone: true, started: false });
+      }
+    }));
   });
   open.sort((a, b) => a.m.t.localeCompare(b.m.t));
   const days = [...new Set(open.map((o) => dayKey(o.m.t)))];
@@ -162,23 +172,23 @@ function betsPage() {
   const recent = done.filter((d) => new Date(d.x.t).getTime() >= cutoff).sort((a, b) => b.x.t.localeCompare(a.x.t));
   const row = (o) => `<tr><td class="l mono" style="${lbar(o.s)};padding-left:12px">${esc(hm(o.m.t))}${o.started ? ' <span class="sub" style="display:inline">started</span>' : ""}</td>
     <td class="l">${lg(o.s)}</td><td><span style="display:inline-block;padding:0 6px;border-radius:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:11px">${esc(o.name)}</span></td>
-    <td class="l"><b>${esc(o.team)}</b> <span class="sub" style="display:inline">${o.side === "a" ? "away at " + esc(o.opp) : "home v " + esc(o.opp)}</span></td>
+    <td class="l"><b>${esc(o.team)}</b> <span class="sub" style="display:inline">${o.side === "a" ? "away at " + esc(o.opp) : "home v " + esc(o.opp)}</span>${o.gone ? '<span class="sub">signal went away: do not bet now; if you already did, it still counts</span>' : ""}</td>
     <td class="l">${o.reg ? "60 minutes (1X2)" : "Moneyline"}</td>
-    <td class="mono">${o.reg ? `${o.est ? o.est.toFixed(2) : "–"}<span class="sub">ours ${odd(o.ours)}</span>` : (o.book ? o.book.toFixed(2) : "–")}</td>
-    <td class="mono">${pc(o.ours)}</td></tr>`;
-  const tallyRule = (s, r) => { const live = r.record.filter((x) => x.t.slice(0, 10) >= r.tracking_from); return `<tr><td class="l" style="${lbar(s)};padding-left:12px">${lg(s)}</td><td><span style="display:inline-block;padding:0 6px;border-radius:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:11px">${esc(r.name)}</span></td><td class="l">${r.market === "reg" ? "60 minutes" : "Moneyline"}</td><td class="l note">${tally(live)}</td><td class="l note">${tally(r.record)}</td></tr>`; };
+    <td class="mono">${o.reg ? `${o.est ? o.est.toFixed(2) : "–"}${o.ours != null ? `<span class="sub">ours ${odd(o.ours)}</span>` : ""}` : (o.book ? o.book.toFixed(2) : "–")}</td>
+    <td class="mono">${o.ours != null ? pc(o.ours) : "–"}</td></tr>`;
+  const tallyRule = (s, r) => { const live = settled(r); return `<tr><td class="l" style="${lbar(s)};padding-left:12px">${lg(s)}</td><td><span style="display:inline-block;padding:0 6px;border-radius:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:11px">${esc(r.name)}</span></td><td class="l">${r.market === "reg" ? "60 minutes" : "Moneyline"}</td><td class="l note">${tally(live)}</td><td class="l note">${tally(r.record)}</td></tr>`; };
   app.innerHTML = `${HEAD()}<h1>Bets</h1>
   <p class="note">Every bet our rules call for, across the NFL, NBA and NHL, in your time zone. NBA and NHL picks appear once the bookmaker has a price, usually on the day of the game, and can still come or go as prices move until the last update of the day. The page updates every hour from about 8:00 to 23:00 Budapest time; for the night's NBA and NHL games, look in the evening. Single bets, 1 unit each.</p>
   ${TABS()}
   ${days.length ? days.map((k) => `<div class="panel"><b>${esc(dayLabel(k))}</b><div class="tw"><table><thead><tr><th class="l">Time</th><th class="l">League</th><th>Rule</th><th class="l">Bet on</th><th class="l">Market</th><th>Price</th><th>Our chance</th></tr></thead><tbody>
     ${open.filter((o) => dayKey(o.m.t) === k).map(row).join("")}</tbody></table></div></div>`).join("") : `<div class="panel"><p class="note" style="margin:10px 0">No bets right now. NBA and NHL prices usually come in during the day; check again in the evening.</p></div>`}
   <p class="note">Price: the bookmaker's moneyline (DraftKings, or the NFL market line), the latest we have seen; take the bet if your bookmaker pays about the same or more. For 60-minute bets we have no bookmaker three-way price: the first number is the bookmaker's price estimated from its moneyline (about what you will be offered), the second our own fair odds (the model sees value if your bookmaker pays at least that).</p>
-  <div class="panel"><b>Last three days</b><div class="tw"><table><thead><tr><th class="l">Game</th><th class="l">League</th><th>Rule</th><th class="l">Bet on</th><th>Price</th><th>Result</th><th>Profit</th></tr></thead><tbody>
+  <div class="panel"><b>Last three days (bet log)</b><div class="tw"><table><thead><tr><th class="l">Game</th><th class="l">League</th><th>Rule</th><th class="l">Bet on</th><th>Price</th><th>Result</th><th>Profit</th></tr></thead><tbody>
     ${recent.length ? recent.map((d) => `<tr><td class="l" style="${lbar(d.s)};padding-left:12px"><span class="sub">${esc(new Date(d.x.t).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }))}</span>${esc(d.x.a)} @ ${esc(d.x.h)}</td><td class="l">${lg(d.s)}</td><td><span style="display:inline-block;padding:0 6px;border-radius:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:11px">${esc(d.r.name)}</span></td><td class="l">${esc(d.x.side === "a" ? d.x.a : d.x.h)}${d.r.market === "reg" ? ' <span class="sub" style="display:inline">60 min</span>' : ""}</td><td class="mono">${d.x.price.toFixed(2)}</td><td class="mono">${d.x.as_}–${d.x.hs}${d.x.pt ? ` <span class="sub" style="display:inline">${esc(d.x.pt)}</span>` : ""}</td><td class="mono"><span class="${d.x.won ? "ok" : "no"}">${sgn(d.x.profit)}</span></td></tr>`).join("") : `<tr><td class="l note" colspan="7">No settled bets in the last three days.</td></tr>`}
   </tbody></table></div></div>
-  <div class="panel"><b>Rules</b><div class="tw"><table><thead><tr><th class="l">League</th><th>Rule</th><th class="l">Market</th><th class="l">Live (since it went up)</th><th class="l">This season</th></tr></thead><tbody>
+  <div class="panel"><b>Rules</b><div class="tw"><table><thead><tr><th class="l">League</th><th>Rule</th><th class="l">Market</th><th class="l">Bet log (live)</th><th class="l">Backtest, closing prices</th></tr></thead><tbody>
     ${D.sports.map((s) => rulesOf(s).map((r) => tallyRule(s, r)).join("")).join("")}</tbody></table></div>
-    <p class="note">The full wording of each rule is on its league's tab. Records use closing prices: the moneyline, or for 60-minute bets the 1X2 price estimated from it.</p></div>
+    <p class="note">The full wording of each rule is on its league's tab. Bet log: every pick shown here before kick-off, at the price when it first appeared, kept even if the signal later went away. Backtest: the whole season on closing prices, which include late moves you could not have seen.</p></div>
   ${D.errors && D.errors.length ? `<p class="note">Update problems: ${D.errors.map(esc).join(" · ")}</p>` : ""}`;
 }
 function render() {
