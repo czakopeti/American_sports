@@ -45,8 +45,8 @@
 "a": "WAS",
 "first_at": "2026-11-25T05:25:01Z",
 "h": "ARI",
-"last_at": "2026-11-27T17:26:58Z",
-"last_price": 1.287,
+"last_at": "2026-11-28T01:26:23Z",
+"last_price": 1.291,
 "market": "ml",
 "on": true,
 "price": 1.297,
@@ -178,7 +178,7 @@
 "a": "EDM",
 "first_at": "2026-11-27T17:27:15Z",
 "h": "SEA",
-"last_at": "2026-11-27T17:27:15Z",
+"last_at": "2026-11-28T01:26:37Z",
 "last_price": 1.965,
 "market": "reg",
 "on": true,
@@ -186,6 +186,19 @@
 "rule": "R2",
 "side": "a",
 "t": "2026-11-29T03:00:00Z"
+},
+"2026-11-29|OTT|CAR|R1": {
+"a": "OTT",
+"first_at": "2026-11-28T01:26:37Z",
+"h": "CAR",
+"last_at": "2026-11-28T01:26:37Z",
+"last_price": 1.612,
+"market": "reg",
+"on": true,
+"price": 1.612,
+"rule": "R1",
+"side": "h",
+"t": "2026-11-29T00:00:00Z"
 }
 },
 "tennis": {}
